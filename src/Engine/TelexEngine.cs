@@ -60,6 +60,12 @@ namespace ThiTap.Engine
         private readonly List<RawKey> _raw = new List<RawKey>();
         private string _onScreen = string.Empty;
 
+        /// <summary>
+        /// Vừa bấm Backspace: phím dấu gõ lại ngay sau đó là đặt lại dấu chứ không phải
+        /// "bấm hai lần để bỏ dấu" ("hội" xoá còn "hộ", gõ "j" thì vẫn là "hộ").
+        /// </summary>
+        private bool _skipToneCancel;
+
         public bool Enabled { get; set; }
 
         /// <summary>Cho phép gõ tự do: vẫn đặt dấu dù âm tiết không hợp lệ.</summary>
@@ -97,6 +103,7 @@ namespace ThiTap.Engine
         {
             if (_raw.Count > 0) _raw.Clear();
             if (_onScreen.Length > 0) _onScreen = string.Empty;
+            _skipToneCancel = false;
         }
 
         /// <summary>
@@ -120,7 +127,6 @@ namespace ThiTap.Engine
                 }
                 return;
             }
-
             if (_raw.Count == 0)
             {
                 ResetWord();
@@ -130,8 +136,25 @@ namespace ThiTap.Engine
             // Sau một lần Backspace, ứng dụng còn hiển thị đúng một chữ ít hơn.
             string before = _onScreen;
             int target = before.Length - 1;
-            _onScreen = target > 0 ? before.Substring(0, target) : string.Empty;
+            string wanted = target > 0 ? before.Substring(0, target) : string.Empty;
+            _onScreen = wanted;
 
+            // Phím dấu có thể nằm sau chữ vừa bị xoá ("ungws" ra "ứng", xoá còn "ứn" thì phải bỏ
+            // phím g chứ không phải phím s), nên thử bỏ từng phím một từ cuối về đầu cho tới khi
+            // chuỗi phím còn lại dựng lại đúng phần chữ đang hiển thị.
+            for (int i = _raw.Count - 1; i >= 0; i--)
+            {
+                RawKey removed = _raw[i];
+                _raw.RemoveAt(i);
+                if (string.Equals(Render(), wanted, StringComparison.Ordinal))
+                {
+                    _skipToneCancel = true;
+                    return;
+                }
+                _raw.Insert(i, removed);
+            }
+
+            // Không phím đơn lẻ nào khớp (phím dấu đè lên cả vần): chỉ rút cho vừa số chữ.
             while (_raw.Count > 0)
             {
                 _raw.RemoveAt(_raw.Count - 1);
@@ -139,6 +162,7 @@ namespace ThiTap.Engine
                 // vì từ chưa hợp lệ được hiển thị nguyên phím thô nên dài hơn số chữ.
                 if (LetterCount() <= target) break;
             }
+            _skipToneCancel = true;
         }
 
         /// <summary>Số chữ mà chuỗi phím thô hiện tại tạo ra (không tính phím dấu đã bị nuốt).</summary>
@@ -173,6 +197,7 @@ namespace ThiTap.Engine
 
             _raw.Add(new RawKey(lower, upper));
             string rendered = Render();
+            _skipToneCancel = false;
             char native = upper ? char.ToUpperInvariant(lower) : lower;
 
             // Ký tự vừa gõ đã đúng như bàn phím sinh ra: cho phím đi qua, không chèn gì.
@@ -300,9 +325,10 @@ namespace ThiTap.Engine
 
                 if (toneOfKey != Vietnamese.ToneNone && HasVowel(plain))
                 {
-                    if (tone != Vietnamese.ToneNone && toneKey == key)
+                    if (tone != Vietnamese.ToneNone && toneKey == key && _raw[i - 1].Ch == key
+                        && !(_skipToneCancel && i == _raw.Count - 1))
                     {
-                        // Gõ lại đúng phím dấu: huỷ dấu và hiện phím đó ra.
+                        // Gõ lại đúng phím dấu ngay sau phím đó: huỷ dấu và hiện phím đó ra.
                         tone = Vietnamese.ToneNone;
                         toneKey = '\0';
                         plain.Add(new PlainChar(key, upper));
@@ -356,7 +382,11 @@ namespace ThiTap.Engine
             return tone;
         }
 
-        /// <summary>w = ư, hoặc biến u/o/a đứng trước thành ư/ơ/ă; "uo" + w thành "ươ".</summary>
+        /// <summary>
+        /// w = ư, hoặc biến u/o/a của âm tiết thành ư/ơ/ă; "uo" + w thành "ươ".
+        /// Phím w hay được gõ sau cả phụ âm cuối ("ung" + w → "ưng", "tang" + w → "tăng")
+        /// nên phải lùi về tìm nguyên âm chứ không chỉ xét chữ vừa gõ.
+        /// </summary>
         private static void ApplyW(List<PlainChar> plain, bool upper)
         {
             if (plain.Count == 0)
@@ -365,11 +395,30 @@ namespace ThiTap.Engine
                 return;
             }
 
-            int lastIndex = plain.Count - 1;
+            int lastIndex = -1;
+            for (int i = plain.Count - 1; i >= 0; i--)
+            {
+                char candidate = plain[i].Ch;
+                if (candidate == 'u' || candidate == 'o' || candidate == 'a')
+                {
+                    lastIndex = i;
+                    break;
+                }
+            }
+
+            // Từ không có u/o/a ("new", "ng"): w là chữ thường, không phải phím dấu.
+            if (lastIndex < 0)
+            {
+                plain.Add(new PlainChar('w', upper));
+                return;
+            }
+
             char last = plain[lastIndex].Ch;
 
-            // "uo" + w = "ươ" (nguowif -> người, cuowis -> cưới)
-            if (last == 'o' && lastIndex > 0 && plain[lastIndex - 1].Ch == 'u')
+            // "uo" + w = "ươ" (nguowif -> người, cuowis -> cưới).
+            // Sau "q" thì chỉ có o thành ơ vì u đã thuộc phụ âm đầu (quow -> quơ).
+            if (last == 'o' && lastIndex > 0 && plain[lastIndex - 1].Ch == 'u'
+                && !(lastIndex > 1 && plain[lastIndex - 2].Ch == 'q'))
             {
                 plain[lastIndex - 1] = new PlainChar('ư', plain[lastIndex - 1].Upper);
                 plain[lastIndex] = new PlainChar('ơ', plain[lastIndex].Upper);
@@ -434,9 +483,10 @@ namespace ThiTap.Engine
                         // Chưa có nguyên âm: đây là chữ số bình thường.
                         plain.Add(new PlainChar(key, false));
                     }
-                    else if (tone != Vietnamese.ToneNone && toneKey == key)
+                    else if (tone != Vietnamese.ToneNone && toneKey == key && _raw[i - 1].Ch == key
+                             && !(_skipToneCancel && i == _raw.Count - 1))
                     {
-                        // Gõ lại đúng phím dấu: huỷ dấu và hiện phím đó ra.
+                        // Gõ lại đúng phím dấu ngay sau phím đó: huỷ dấu và hiện phím đó ra.
                         tone = Vietnamese.ToneNone;
                         toneKey = '\0';
                         plain.Add(new PlainChar(key, false));

@@ -17,6 +17,7 @@ Bản chạy sẵn (không cần cài đặt): [ThiTap 1.0 — ThiTap-1.0-win64.
 - **Gõ tắt** theo bảng khoá → nội dung, mở rộng khi gõ dấu cách hoặc dấu câu.
 - **Tự động khôi phục phím tiếng Anh**: gõ `test` không bị biến thành `tést`.
 - **Xoá lui rồi gõ tiếp vẫn đúng**: bấm Backspace giữa chữ (vd. `hội` → `hộ`) thì phím dấu gõ tiếp theo đặt lại trên chữ còn lại, không bị dính `j`, `s`, `f`... ra ngoài.
+- **Đặt dấu muộn vẫn đúng**: `w` gõ sau phụ âm cuối vẫn đổi được nguyên âm của âm tiết (`ungws` → `ứng`, `thuongw` → `thương`).
 - **Luôn dùng clipboard cho Unicode** cho ứng dụng không nhận `SendInput` Unicode.
 - **Bật/tắt theo từng ứng dụng**: khai báo danh sách tiến trình không muốn gõ tiếng Việt.
 - **Chuyển tiếng Việt / English** bằng `Ctrl + Shift`, `Alt + Z` hoặc bấm chuột trái vào biểu tượng ở khay.
@@ -40,6 +41,8 @@ Bản chạy sẵn (không cần cài đặt): [ThiTap 1.0 — ThiTap-1.0-win64.
 | `w` | ư / ơ / ă (bấm `ww` để ra chữ `w`) |
 | `dd` | đ |
 | `uo` + `w` | ươ (`nguowif` → người) |
+
+gõ `w` muộn, sau cả phụ âm cuối, vẫn đổi đúng nguyên âm của âm tiết: `ungw` → ưng, `ungws` → ứng, `thuongw` → thương.
 
 Ví dụ: `tieengs Vieetj` → tiếng Việt.
 
@@ -140,9 +143,9 @@ Mục **Tải về** ở đầu README trỏ tới `/releases/latest` nên khôn
 
 `bin\TelexTest.exe` (do `build.ps1 -Test` sinh ra) chạy hoàn toàn ở mức lõi gõ, không cần bàn phím thật:
 
-- 78 từ và 4 câu Telex;
-- 30 từ và 2 câu VNI;
-- 13 chuỗi Telex và 3 chuỗi VNI có bấm Backspace giữa chừng (mô phỏng cả màn hình lẫn lõi gõ);
+- 99 từ và 5 câu Telex;
+- 33 từ và 2 câu VNI;
+- 16 chuỗi Telex và 3 chuỗi VNI có bấm Backspace giữa chừng (mô phỏng cả màn hình lẫn lõi gõ);
 - gõ tắt (mở rộng đúng, không mở rộng khi tắt);
 - khôi phục phím tiếng Anh (có và không được khôi phục).
 

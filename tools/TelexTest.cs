@@ -94,6 +94,31 @@ namespace ThiTap.Test
             Check("WW", "W");
             Check("www", "ww");
             Check("uww", "uw");
+
+            // w gõ sau cả phụ âm cuối vẫn đổi đúng nguyên âm của âm tiết: "ung" + w ra "ưng",
+            // nên "ungws" phải ra "ứng" chứ không phải "úngw".
+            Check("ungw", "ưng");
+            Check("ungws", "ứng");
+            Check("ungsw", "ứng");
+            Check("ungwf", "ừng");
+            Check("uwng", "ưng");
+            Check("UNGW", "ƯNG");
+            Check("Ungws", "Ứng");
+            Check("tangw", "tăng");
+            Check("angw", "ăng");
+            Check("anw", "ăn");
+            Check("namw", "năm");
+            Check("quangw", "quăng");
+            Check("thuongw", "thương");
+            Check("thuongwf", "thường");
+            Check("quow", "quơ");
+            Check("quowr", "quở");
+            Check("noiw", "nơi");
+            Check("khoiw", "khơi");
+            Check("toiw", "tơi");
+            // Từ không có u/o/a thì w vẫn là chữ thường.
+            Check("new", "new");
+            Check("emw", "emw");
             Check("test", "tét");
             Check("hello", "hello");
             Check("asd", "asd");
@@ -118,6 +143,11 @@ namespace ThiTap.Test
             BackspaceCheckVni("bua1", 1, "a1", "búa");
             BackspaceCheckVni("vie6t5", 1, "t5", "việt");
 
+            // Phím dấu đứng sau chữ bị xoá: phải bỏ đúng phím của chữ vừa mất (g), giữ lại phím dấu (w/s).
+            BackspaceCheck("ungws", 1, "g", "ứng");
+            BackspaceCheck("thuongw", 1, "g", "thương");
+            BackspaceCheck("nguowif", 1, "i", "người");
+
             // Đoạn văn đầy đủ dấu (không kèm dấu câu: dấu câu do tầng bàn phím xử lý).
             Sentence(
                 "Tooi ddang vieets ddoanj vawn nayf ddeer kieemr tra booj gox tieengs Vieetj",
@@ -131,6 +161,9 @@ namespace ThiTap.Test
             Sentence(
                 "Car hai cais ddeeuf hoatj ddoongj toots neeus caaus hinhf ddungs",
                 "Cả hai cái đều hoạt động tốt nếu cấu hình đúng");
+            Sentence(
+                "Ungws dungj tieengs Vieetj gox dduowcj khoong",
+                "Ứng dụng tiếng Việt gõ được không");
 
             // Gõ tắt: chốt từ bằng dấu cách thì mở rộng theo bảng.
             Expand("vn", "Việt Nam", true);
@@ -176,6 +209,9 @@ namespace ThiTap.Test
             Vni("a8m", "ăm");
             Vni("cha8n5", "chặn");
             Vni("u7u", "ưu");
+            Vni("ung7", "ưng");
+            Vni("ung71", "ứng");
+            Vni("quang8", "quăng");
 
             // Cả câu theo kiểu VNI.
             SentenceVni("Toi6 d9ang vie6t1 tie6ng1 Vie6t5", "Tôi đang viết tiếng Việt");
