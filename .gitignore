@@ -1,0 +1,15 @@
+# Bản dựng và tệp tạm
+bin/
+.tmp/
+.qoder/
+
+# Cấu hình sinh ra lúc chạy: không đưa lên repo
+settings.ini
+macros.txt
+apps.txt
+
+# Windows / IDE
+*.user
+*.suo
+Thumbs.db
+desktop.ini
