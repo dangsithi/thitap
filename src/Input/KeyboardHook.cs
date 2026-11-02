@@ -18,6 +18,8 @@ namespace ThiTap.Input
         private const int VkCapital = 0x14;
         private const int VkBack = 0x08;
         private const int VkZ = 0x5A;
+        private const int VkOpenBracket = 0xDB;
+        private const int VkCloseBracket = 0xDD;
         private const int VkLShift = 0xA0;
         private const int VkRShift = 0xA1;
         private const int VkLControl = 0xA2;
@@ -243,8 +245,6 @@ namespace ThiTap.Input
                 case 0xBF: // dấu /
                 case 0xBA: // dấu ;
                 case 0xDE: // dấu '
-                case 0xDB: // dấu [
-                case 0xDD: // dấu ]
                 case 0xDC: // dấu \
                 case 0xBB: // dấu =
                 case 0xBD: // dấu -
@@ -328,6 +328,14 @@ namespace ThiTap.Input
             {
                 keyChar = (char)('0' + (virtualKey - 0x30));
                 digit = true;
+                return true;
+            }
+
+            // Telex: "[" và "]" là phím gõ nhanh ư và ơ; kèm Shift thì vẫn là dấu câu.
+            if (!_engine.Vni && !IsDown(VkShift)
+                && (virtualKey == VkOpenBracket || virtualKey == VkCloseBracket))
+            {
+                keyChar = virtualKey == VkOpenBracket ? '[' : ']';
                 return true;
             }
 

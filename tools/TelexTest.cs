@@ -82,6 +82,12 @@ namespace ThiTap.Test
             Check("ass", "as");
             Check("az", "az");
             Check("asz", "a");
+
+            // Ví dụ trong hướng dẫn UniKey: gõ đè dấu mới (toanfs = toán), z xoá dấu (toansz = toan),
+            // gõ lặp phím dấu để lấy lại chữ thường (guitarr = guitar).
+            Check("toanfs", "toán");
+            Check("toansz", "toan");
+            Check("guitarr", "guitar");
             Check("aa", "â");
             Check("aaa", "aaa");
             Check("w", "ư");
@@ -119,6 +125,18 @@ namespace ThiTap.Test
             // Từ không có u/o/a thì w vẫn là chữ thường.
             Check("new", "new");
             Check("emw", "emw");
+
+            // "[" và "]" là phím gõ nhanh ư và ơ theo bảng Telex của UniKey.
+            Check("[", "ư");
+            Check("th[", "thư");
+            Check("th[s", "thứ");
+            Check("th[r", "thử");
+            Check("[ng", "ưng");
+            Check("[ngs", "ứng");
+            Check("]", "ơ");
+            Check("c]", "cơ");
+            Check("c]s", "cớ");
+            Check("th]", "thơ");
             Check("test", "tét");
             Check("hello", "hello");
             Check("asd", "asd");
@@ -195,7 +213,10 @@ namespace ThiTap.Test
             Vni("hoa3", "hỏa");
             Vni("a1", "á");
             Vni("tie6ng1z", "tie6ng1z");
-            Vni("a66", "a66");
+            Vni("a66", "â");
+            // Như ví dụ trong hướng dẫn UniKey: 9 lùi về đổi chữ d, 7 bấm lại không sinh thêm số.
+            Vni("duong97", "đương");
+            Vni("duong9772", "đường");
             Vni("abc123", "abc");
             Vni("123", "123");
             Vni("d9", "d9");

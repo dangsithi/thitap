@@ -354,6 +354,11 @@ namespace ThiTap.Engine
                     }
                     consumedIndex = i;
                 }
+                else if (key == '[' || key == ']')
+                {
+                    // "[" và "]" là phím gõ nhanh ư và ơ: "th[" ra "thư", "n]" ra "nơ".
+                    plain.Add(new PlainChar(key == '[' ? 'ư' : 'ơ', upper));
+                }
                 else if (key == 'w')
                 {
                     if (i > 0 && _raw[i - 1].Ch == 'w')
@@ -522,7 +527,13 @@ namespace ThiTap.Engine
                 {
                     // Phím dấu (6-9) không tính là đã "nuốt" như phím thanh điệu,
                     // nên từ không hợp lệ vẫn hiện đủ phím đã gõ (d9 -> d9, d9a -> đa).
-                    if (!ApplyVniMark(plain, key)) plain.Add(new PlainChar(key, false));
+                    if (!ApplyVniMark(plain, key))
+                    {
+                        // Dấu mũ/móc/trăng đã có sẵn trong từ thì bấm lại không sinh thêm số
+                        // (duong9772 -> đường, như ví dụ trong hướng dẫn UniKey).
+                        if (key <= '8' && HasMarkOfKind(plain, key)) { }
+                        else plain.Add(new PlainChar(key, false));
+                    }
                 }
                 else
                 {
@@ -576,15 +587,33 @@ namespace ThiTap.Engine
                     marked = 'ă';
                     break;
 
-                default: // '9' = đ, chỉ đúng khi ngay sau d
-                    if (plain[plain.Count - 1].Ch != 'd') return false;
-                    index = plain.Count - 1;
+                default: // '9' = đ, lùi về tìm chữ d gần nhất (d9, và cả duong9)
+                    index = LastIndexOfAny(plain, "d");
+                    if (index < 0) return false;
                     marked = 'đ';
                     break;
             }
 
             plain[index] = new PlainChar(marked, plain[index].Upper);
             return true;
+        }
+
+        /// <summary>Từ đã có dấu loại này chưa: 6 = mũ, 7 = móc, 8 = trăng.</summary>
+        private static bool HasMarkOfKind(List<PlainChar> plain, char key)
+        {
+            string marked;
+            switch (key)
+            {
+                case '6': marked = "âêô"; break;
+                case '7': marked = "ươ"; break;
+                default: marked = "ă"; break;
+            }
+
+            for (int i = 0; i < plain.Count; i++)
+            {
+                if (marked.IndexOf(plain[i].Ch) >= 0) return true;
+            }
+            return false;
         }
 
         private static int LastIndexOfAny(List<PlainChar> plain, string chars)
