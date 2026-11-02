@@ -9,7 +9,7 @@ namespace ThiTap
     /// <summary>
     /// Thiết kế icon dùng chung cho khay hệ thống và icon nhúng trong file exe.
     /// Đang gõ tiếng Việt: cờ Việt Nam (nền đỏ, sao vàng).
-    /// Đang dùng tiếng Anh (không gõ tiếng Việt): cờ Anh (nền trắng, thánh giá đỏ).
+    /// Đang dùng tiếng Anh (không gõ tiếng Việt): cờ Liên hiệp Anh (Union Jack).
     /// </summary>
     internal static class IconDesign
     {
@@ -17,12 +17,21 @@ namespace ThiTap
         private static readonly Color VietnamYellow = Color.FromArgb(0xFF, 0xDD, 0x00);
         private static readonly Color VietnamEdge = Color.FromArgb(60, 0, 0, 0);
 
-        private static readonly Color EnglandWhite = Color.White;
-        private static readonly Color EnglandRed = Color.FromArgb(0xCE, 0x11, 0x24);
-        private static readonly Color EnglandEdge = Color.FromArgb(0xB0, 0xB0, 0xB0);
+        private static readonly Color UnionBlue = Color.FromArgb(0x01, 0x21, 0x69);
+        private static readonly Color UnionRed = Color.FromArgb(0xC8, 0x10, 0x2E);
+        private static readonly Color UnionEdge = Color.FromArgb(0xB0, 0xB0, 0xB0);
 
-        /// <summary>Bề rộng thánh giá cờ Anh, tính theo tỉ lệ cạnh icon.</summary>
-        private const float CrossWidthRatio = 0.24f;
+        /// <summary>Bề rộng chữ thập đỏ (thánh giá George), tính theo tỉ lệ cạnh icon.</summary>
+        private const float CrossRedRatio = 0.20f;
+
+        /// <summary>Bề rộng chữ thập trắng viền quanh chữ thập đỏ.</summary>
+        private const float CrossWhiteRatio = 0.34f;
+
+        /// <summary>Bề rộng dải chéo trắng (thánh giá Andrew), tính theo tỉ lệ cạnh icon.</summary>
+        private const float SaltireWhiteRatio = 0.20f;
+
+        /// <summary>Bề rộng dải chéo đỏ (thánh giá Patrick) nằm trong dải chéo trắng.</summary>
+        private const float SaltireRedRatio = 0.075f;
 
         /// <summary>Bán kính ngoài của sao vàng, tính theo tỉ lệ cạnh icon.</summary>
         private const float StarRadiusRatio = 0.33f;
@@ -76,7 +85,7 @@ namespace ThiTap
                     }
                     else
                     {
-                        DrawEnglandFlag(graphics, flag, inset, side, center);
+                        DrawUnionFlag(graphics, flag, inset, side, center);
                     }
                 }
             }
@@ -102,26 +111,60 @@ namespace ThiTap
             }
         }
 
-        /// <summary>Cờ Anh (St George): nền trắng, thánh giá đỏ chạy giữa.</summary>
-        private static void DrawEnglandFlag(Graphics graphics, GraphicsPath flag, float inset, float side, float center)
+        /// <summary>
+        /// Cờ Liên hiệp Anh (Union Jack): nền xanh, hai dải chéo trắng (thánh giá Andrew) có dải đỏ mảnh
+        /// ở giữa (thánh giá Patrick), rồi chữ thập trắng viền chữ thập đỏ (thánh giá George) nằm trên cùng.
+        /// </summary>
+        private static void DrawUnionFlag(Graphics graphics, GraphicsPath flag, float inset, float side, float center)
         {
-            using (SolidBrush white = new SolidBrush(EnglandWhite))
+            using (SolidBrush blue = new SolidBrush(UnionBlue))
             {
-                graphics.FillPath(white, flag);
+                graphics.FillPath(blue, flag);
             }
 
-            // Cắt theo viền bo góc để hai thanh thánh giá không tràn ra ngoài.
+            // Cắt theo viền bo góc để các dải không tràn ra ngoài.
             GraphicsState state = graphics.Save();
             graphics.SetClip(flag);
-            float arm = side * CrossWidthRatio;
-            using (SolidBrush red = new SolidBrush(EnglandRed))
+
+            float left = inset;
+            float top = inset;
+            float right = inset + side;
+            float bottom = inset + side;
+
+            using (Pen white = new Pen(Color.White, side * SaltireWhiteRatio))
             {
-                graphics.FillRectangle(red, inset, center - arm / 2f, side, arm);
-                graphics.FillRectangle(red, center - arm / 2f, inset, arm, side);
+                graphics.DrawLine(white, left, top, right, bottom);
+                graphics.DrawLine(white, left, bottom, right, top);
             }
+
+            // Ở cỡ 16 pixel dải đỏ mảnh chỉ chiếm hơn một điểm ảnh nên bị nhoè, bỏ để icon rõ ràng hơn.
+            float saltireRed = side * SaltireRedRatio;
+            if (saltireRed >= 1.5f)
+            {
+                using (Pen red = new Pen(UnionRed, saltireRed))
+                {
+                    graphics.DrawLine(red, left, top, right, bottom);
+                    graphics.DrawLine(red, left, bottom, right, top);
+                }
+            }
+
+            float whiteArm = side * CrossWhiteRatio;
+            float redArm = side * CrossRedRatio;
+            using (SolidBrush white = new SolidBrush(Color.White))
+            {
+                graphics.FillRectangle(white, left, center - whiteArm / 2f, side, whiteArm);
+                graphics.FillRectangle(white, center - whiteArm / 2f, top, whiteArm, side);
+            }
+
+            using (SolidBrush red = new SolidBrush(UnionRed))
+            {
+                graphics.FillRectangle(red, left, center - redArm / 2f, side, redArm);
+                graphics.FillRectangle(red, center - redArm / 2f, top, redArm, side);
+            }
+
             graphics.Restore(state);
 
-            using (Pen edge = new Pen(EnglandEdge, EdgeWidth(side)))
+            using (Pen edge = new Pen(UnionEdge, EdgeWidth(side)))
             {
                 graphics.DrawPath(edge, flag);
             }
