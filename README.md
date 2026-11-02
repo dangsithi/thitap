@@ -114,6 +114,24 @@ Yêu cầu: Windows 10/11 với .NET Framework 4.x (đã có sẵn), không cầ
 
 Script dùng `csc.exe` của .NET Framework và tự thêm BOM UTF-8 cho mọi file `.cs` (nếu thiếu BOM, `csc.exe` sẽ đọc theo bảng mã ANSI và làm hỏng chữ tiếng Việt).
 
+## Phát hành bản mới
+
+`bin/` bị `.gitignore` bỏ qua, nên file chạy sẵn không nằm trong repo mà được đưa lên **Releases**.
+
+1. Build và kiểm thử: `.\build.ps1 -Test` phải in `TẤT CẢ ĐỀU ĐÚNG`.
+2. Đóng gói (chỉ ba file này, không kèm `settings.ini` để người dùng mới tự sinh):
+
+   ```powershell
+   Compress-Archive -Path bin\ThiTap.exe, README.md, LICENSE -DestinationPath bin\ThiTap-<version>-win64.zip -Force
+   ```
+
+3. Tạo release với tag `v<version>` (GitHub → Releases → *Draft a new release*, hoặc gọi REST API `POST /repos/dangsithi/thitap/releases` rồi upload asset lên `uploads.github.com`).
+4. Kiểm tra lại: tải asset từ đường dẫn `.../releases/download/<tag>/<file>` phải trả về `HTTP 200` với đúng số byte.
+
+Mục **Tải về** ở đầu README trỏ tới `/releases/latest` nên không cần sửa lại mỗi lần phát hành.
+
+Bản hiện tại: [v1.0](https://github.com/dangsithi/thitap/releases/tag/v1.0) — `ThiTap.exe`, `README.md`, `LICENSE` (42.294 byte).
+
 ## Kiểm thử
 
 `bin\TelexTest.exe` (do `build.ps1 -Test` sinh ra) chạy hoàn toàn ở mức lõi gõ, không cần bàn phím thật:
