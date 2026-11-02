@@ -8,7 +8,7 @@ Hỗ trợ **Telex** và **VNI**, xuất **Unicode dựng sẵn**, có gõ tắt
 
 ## Tải về
 
-Bản chạy sẵn (không cần cài đặt): [ThiTap 1.0 — ThiTap-1.0-win64.zip](https://github.com/dangsithi/thitap/releases/latest)
+Bản chạy sẵn (không cần cài đặt): [ThiTap 1.3 — ThiTap-1.3-win64.zip](https://github.com/dangsithi/thitap/releases/latest)
 
 ## Tính năng
 
@@ -156,6 +156,7 @@ Mục **Tải về** ở đầu README trỏ tới `/releases/latest` nên khôn
 
 ### Lịch sử phát hành
 
+- **v1.3** — `ThiTap-1.3-win64.zip`: giao diện tối toàn bộ (bảng màu `#202020` / `#2B2B2B` / `#4CC2FF`, card bo góc), thêm phím `[` `]`, luật UniKey cho từ không phải âm tiết tiếng Việt (`WWindowws` → `Windows`).
 - **v1.2** — `ThiTap-1.2-win64.zip`: `w` gõ sau phụ âm cuối vẫn đổi đúng nguyên âm (`ungws` → `ứng`, `thuongw` → `thương`); xoá lui bỏ đúng phím của chữ vừa mất nên gõ tiếp vẫn ra đúng từ.
 - **v1.1** — `ThiTap-1.1-win64.zip`: sửa lỗi đặt dấu sai sau khi bấm Backspace rồi gõ tiếp (`hội` → xoá → `ij` ra `hộị` như bản cũ, nay ra `hội`).
 - **v1.0** — `ThiTap-1.0-win64.zip`: bản đầu tiên, Telex + VNI, biểu tượng khay cờ Việt Nam / cờ Liên hiệp Anh, bỏ thông báo khi chuyển ngôn ngữ, luật gõ `ww` = `w`.

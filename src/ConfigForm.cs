@@ -11,6 +11,9 @@ namespace ThiTap
     /// </summary>
     internal sealed class ConfigForm : Form
     {
+        /// <summary>Phiên bản hiển thị ở thanh tiêu đề và hộp thoại Thông tin.</summary>
+        public const string Version = "1.3";
+
         private readonly Action _settingsChanged;
         private readonly Action _exitApp;
 
@@ -35,7 +38,7 @@ namespace ThiTap
             _settingsChanged = settingsChanged;
             _exitApp = exitApp;
 
-            Text = "ThiTap 1.0";
+            Text = "ThiTap " + Version;
             ClientSize = new Size(560, 610);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
@@ -245,7 +248,7 @@ namespace ThiTap
         private void ShowAbout()
         {
             DarkBox.Info(this, "Thông tin",
-                "ThiTap 1.0 — bộ gõ tiếng Việt cá nhân cho Windows.\n" +
+                "ThiTap " + Version + " — bộ gõ tiếng Việt cá nhân cho Windows.\n" +
                 "Tác giả: Ông Thi\n" +
                 "Bảng mã: Unicode dựng sẵn\n" +
                 "Kiểu gõ: " + (Settings.VniMode ? "VNI" : "Telex") + "\n\n" +
