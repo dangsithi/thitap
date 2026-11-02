@@ -5,28 +5,28 @@ using System.Windows.Forms;
 namespace ThiTap
 {
     /// <summary>
-    /// Hộp thoại cấu hình bố cục theo UniKey. Mỗi thay đổi được lưu và áp dụng ngay,
-    /// nên nút "Đóng" chỉ để ẩn hộp thoại. Các mục chưa hỗ trợ bị làm mờ.
+    /// Hộp thoại cấu hình giao diện tối: nền #202020, nội dung chia thành các card #2B2B2B
+    /// bo góc, ô nhập lõm tối hơn, nút chính màu accent. Mỗi thay đổi được lưu và áp dụng
+    /// ngay, nên nút "Đóng" chỉ để ẩn hộp thoại.
     /// </summary>
     internal sealed class ConfigForm : Form
     {
         private readonly Action _settingsChanged;
         private readonly Action _exitApp;
-        private bool _loading;
 
-        private ComboBox _typingMethod;
-        private RadioButton _hotkeyCtrlShift;
-        private RadioButton _hotkeyAltZ;
-        private CheckBox _oldStyleTone;
-        private CheckBox _spellCheck;
-        private CheckBox _beepOnSwitch;
-        private CheckBox _showDialogOnStart;
-        private CheckBox _autoStart;
-        private CheckBox _clipboard;
-        private CheckBox _autoRestore;
-        private CheckBox _macroEnabled;
-        private CheckBox _macroWhenOff;
-        private CheckBox _appFilter;
+        private DarkComboBox _typingMethod;
+        private DarkRadio _hotkeyCtrlShift;
+        private DarkRadio _hotkeyAltZ;
+        private DarkCheckBox _oldStyleTone;
+        private DarkCheckBox _spellCheck;
+        private DarkCheckBox _beepOnSwitch;
+        private DarkCheckBox _showDialogOnStart;
+        private DarkCheckBox _autoStart;
+        private DarkCheckBox _clipboard;
+        private DarkCheckBox _autoRestore;
+        private DarkCheckBox _macroEnabled;
+        private DarkCheckBox _macroWhenOff;
+        private DarkCheckBox _appFilter;
         private MacroForm _macroForm;
         private AppFilterForm _appForm;
 
@@ -36,8 +36,7 @@ namespace ThiTap
             _exitApp = exitApp;
 
             Text = "ThiTap 1.0";
-            Font = new Font("Segoe UI", 9f);
-            ClientSize = new Size(500, 464);
+            ClientSize = new Size(560, 610);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             ShowInTaskbar = true;
@@ -47,176 +46,100 @@ namespace ThiTap
             Icon icon = IconDesign.CreateIcon(32, true);
             Icon = icon;
 
+            Theme.Apply(this);
+
             BuildUi();
             LoadValues();
+
+            // Không để nút đầu tiên nhận tiêu điểm khi mở (viền accent trông như đang chọn).
+            ActiveControl = null;
         }
 
         private void BuildUi()
         {
-            GroupBox controlGroup = AddGroup("Điều khiển", 8, 8, 484, 130);
+            const int left = Ui.Pad;
+            const int width = 528;
+            const int right = left + width;
 
-            AddLabel(controlGroup, "Bảng mã:", 12, 24, 72);
-            AddCombo(controlGroup, "Unicode", 88, 21, 150);
-            AddLabel(controlGroup, "Kiểu gõ:", 12, 56, 72);
-            _typingMethod = AddChoice(controlGroup, new string[] { "Telex", "VNI" }, 88, 53, 150,
+            Ui.Title(this, "ThiTap", left, 10, 220);
+            Ui.Note(this, "Bộ gõ tiếng Việt · bảng mã Unicode dựng sẵn", left, 40, 300);
+
+            Ui.Button(this, "Thu nhỏ", right - 200, 18, 96, 30, delegate { Hide(); });
+            Ui.Button(this, "Kết thúc", right - 96, 18, 96, 30, delegate
+            {
+                if (_exitApp != null) _exitApp();
+            });
+
+            CardPanel controlCard = Ui.Card(this, "Điều khiển", left, 68, width, 144);
+
+            Ui.Label(controlCard, "Bảng mã", 16, 46, 60);
+            Ui.Combo(controlCard, new string[] { "Unicode" }, 80, 44, 132, 0, null, false);
+
+            Ui.Label(controlCard, "Kiểu gõ", 232, 46, 54);
+            _typingMethod = Ui.Combo(controlCard, new string[] { "Telex", "VNI" }, 292, 44, 118,
                 Settings.VniMode ? 1 : 0, delegate(int index)
                 {
                     Settings.InputMethod = index == 1 ? Settings.InputVni : Settings.InputTelex;
-                });
-            AddButton(controlGroup, "...", 244, 53, 28, 23, null, false);
+                    ApplyChanged();
+                }, true);
+            Ui.Button(controlCard, "...", 418, 44, 34, 24, null).Enabled = false;
 
-            AddLabel(controlGroup, "Phím chuyển:", 12, 90, 88);
-            _hotkeyCtrlShift = AddRadio(controlGroup, "CTRL + SHIFT", 100, 88, 112, Settings.HotkeyCtrlShift);
-            _hotkeyAltZ = AddRadio(controlGroup, "ALT + Z", 218, 88, 90, Settings.HotkeyAltZ);
+            Ui.Label(controlCard, "Phím chuyển", 16, 86, 82);
+            bool altZ = string.Equals(Settings.Hotkey, Settings.HotkeyAltZ, StringComparison.Ordinal);
+            _hotkeyCtrlShift = Ui.Radio(controlCard, "CTRL + SHIFT", 102, 85, 108, !altZ,
+                delegate { SelectHotkey(Settings.HotkeyCtrlShift); });
+            _hotkeyAltZ = Ui.Radio(controlCard, "ALT + Z", 214, 85, 90, altZ,
+                delegate { SelectHotkey(Settings.HotkeyAltZ); });
 
-            AddButton(controlGroup, "✓ Đóng", 326, 20, 146, 28, delegate { Hide(); }, true);
-            AddButton(controlGroup, "× Kết thúc", 326, 55, 146, 28, delegate
-            {
-                if (_exitApp != null) _exitApp();
-            }, true);
-            AddButton(controlGroup, "— Thu nhỏ", 326, 90, 146, 28, delegate { Hide(); }, true);
+            CardPanel optionCard = Ui.Card(this, "Tùy chọn", left, 224, width, 138);
 
-            GroupBox optionGroup = AddGroup("Tùy chọn khác", 8, 146, 484, 130);
+            _oldStyleTone = Ui.Check(optionCard, "Đặt dấu oà, uý (thay vì oá, úy)", 16, 44, 240, true,
+                delegate(bool value) { Settings.OldStyleTone = value; ApplyChanged(); });
+            _clipboard = Ui.Check(optionCard, "Luôn dùng clipboard cho Unicode", 16, 72, 240, true,
+                delegate(bool value) { Settings.ClipboardMode = value; ApplyChanged(); });
 
-            _oldStyleTone = AddCheck(optionGroup, "Đặt dấu oà, uý (thay vì oá, úy)", 12, 24, 232, true,
-                delegate(bool value) { Settings.OldStyleTone = value; });
-            _clipboard = AddCheck(optionGroup, "Luôn sử dụng clipboard cho Unicode", 12, 48, 232, true,
-                delegate(bool value) { Settings.ClipboardMode = value; });
+            _spellCheck = Ui.Check(optionCard, "Bật kiểm tra chính tả", 272, 44, 240, true,
+                delegate(bool value) { Settings.SpellCheck = value; ApplyChanged(); });
+            _autoRestore = Ui.Check(optionCard, "Tự khôi phục phím tiếng Anh", 272, 72, 240, true,
+                delegate(bool value) { Settings.AutoRestore = value; ApplyChanged(); });
+            _beepOnSwitch = Ui.Check(optionCard, "Bật chuông khi chuyển ngôn ngữ", 272, 100, 240, true,
+                delegate(bool value) { Settings.BeepOnSwitch = value; ApplyChanged(); });
 
-            _spellCheck = AddCheck(optionGroup, "Bật kiểm tra chính tả", 252, 24, 232, true,
-                delegate(bool value) { Settings.SpellCheck = value; });
-            _autoRestore = AddCheck(optionGroup, "Tự động khôi phục phím tiếng Anh", 252, 48, 232, true,
-                delegate(bool value) { Settings.AutoRestore = value; });
-            _beepOnSwitch = AddCheck(optionGroup, "Bật chuông khi chuyển ngôn ngữ", 252, 72, 232, true,
-                delegate(bool value) { Settings.BeepOnSwitch = value; });
+            CardPanel macroCard = Ui.Card(this, "Gõ tắt", left, 374, 240, 146);
+            _macroEnabled = Ui.Check(macroCard, "Cho phép gõ tắt", 16, 44, 208, true,
+                delegate(bool value) { Settings.MacroEnabled = value; ApplyChanged(); });
+            _macroWhenOff = Ui.Check(macroCard, "Gõ tắt cả khi tắt tiếng Việt", 16, 72, 208, true,
+                delegate(bool value) { Settings.MacroWhenOff = value; ApplyChanged(); });
+            Ui.Button(macroCard, "Bảng gõ tắt...", 16, 100, 150, 30, delegate { ShowMacros(); });
 
-            GroupBox macroGroup = AddGroup("Tùy chọn gõ tắt", 8, 284, 244, 116);
-            _macroEnabled = AddCheck(macroGroup, "Cho phép gõ tắt", 12, 22, 220, true,
-                delegate(bool value) { Settings.MacroEnabled = value; });
-            _macroWhenOff = AddCheck(macroGroup, "Gõ tắt cả khi tắt tiếng Việt", 12, 46, 220, true,
-                delegate(bool value) { Settings.MacroWhenOff = value; });
-            AddButton(macroGroup, "Bảng gõ tắt...", 12, 74, 150, 26, delegate { ShowMacros(); }, true);
+            CardPanel systemCard = Ui.Card(this, "Hệ thống", left + 256, 374, 272, 146);
+            _showDialogOnStart = Ui.Check(systemCard, "Mở hội thoại này khi khởi động", 16, 44, 240, true,
+                delegate(bool value) { Settings.ShowDialogOnStart = value; ApplyChanged(); });
+            _autoStart = Ui.Check(systemCard, "Khởi động cùng Windows", 16, 72, 240, true, SetAutoStart);
+            _appFilter = Ui.Check(systemCard, "Bật/tắt theo ứng dụng", 16, 100, 170, true,
+                delegate(bool value) { Settings.AppFilter = value; ApplyChanged(); });
+            Ui.Button(systemCard, "Chọn...", 194, 98, 62, 30, delegate { ShowApps(); });
 
-            GroupBox systemGroup = AddGroup("Hệ thống", 256, 284, 236, 116);
-            _showDialogOnStart = AddCheck(systemGroup, "Bật hội thoại này khi khởi động", 12, 22, 214, true,
-                delegate(bool value) { Settings.ShowDialogOnStart = value; });
-            _autoStart = AddCheck(systemGroup, "Khởi động cùng Windows", 12, 46, 214, true, SetAutoStart);
-            _appFilter = AddCheck(systemGroup, "Bật/tắt theo ứng dụng", 12, 70, 148, true,
-                delegate(bool value) { Settings.AppFilter = value; });
-            AddButton(systemGroup, "Chọn...", 166, 68, 62, 23, delegate { ShowApps(); }, true);
+            Ui.Note(this, "Bảng mã: chỉ Unicode. Các mục bị làm mờ chưa có trong bản này.",
+                left, 534, width);
 
-            // Giao diện đã là tiếng Việt nên mục này luôn bật và không cần thay đổi.
-            CheckBox vietnameseUi = AddCheck(systemGroup, "Vietnamese interface", 12, 94, 214, false, null);
-            vietnameseUi.Checked = true;
-
-            Label note = new Label();
-            note.Text = "Bảng mã: chỉ Unicode. Các mục bị làm mờ chưa có trong bản này.";
-            note.Location = new Point(8, 404);
-            note.Size = new Size(484, 16);
-            note.ForeColor = SystemColors.GrayText;
-            Controls.Add(note);
-
-            AddButton(this, "Hướng dẫn", 8, 424, 110, 28, delegate { ShowHelp(); }, true);
-            AddButton(this, "Thông tin", 126, 424, 100, 28, delegate { ShowAbout(); }, true);
-            AddButton(this, "Mặc định", 232, 424, 100, 28, delegate { ResetToDefaults(); }, true);
+            Ui.Button(this, "Hướng dẫn", left, 562, 104, 32, delegate { ShowHelp(); });
+            Ui.Button(this, "Thông tin", left + 112, 562, 96, 32, delegate { ShowAbout(); });
+            Ui.Button(this, "Mặc định", left + 216, 562, 96, 32, delegate { ResetToDefaults(); });
+            Ui.PrimaryButton(this, "Đóng", right - 104, 562, 104, 32, delegate { Hide(); });
         }
 
-        private GroupBox AddGroup(string text, int x, int y, int width, int height)
+        private void SelectHotkey(string hotkey)
         {
-            GroupBox group = new GroupBox();
-            group.Text = text;
-            group.Location = new Point(x, y);
-            group.Size = new Size(width, height);
-            Controls.Add(group);
-            return group;
-        }
+            Settings.Hotkey = hotkey;
 
-        private void AddLabel(Control parent, string text, int x, int y, int width)
-        {
-            Label label = new Label();
-            label.Text = text;
-            label.Location = new Point(x, y);
-            label.Size = new Size(width, 18);
-            parent.Controls.Add(label);
-        }
+            // Nút chọn không còn tự loại trừ nhau như RadioButton, nên đồng bộ cả hai.
+            Ui.Loading = true;
+            _hotkeyCtrlShift.Checked = string.Equals(hotkey, Settings.HotkeyCtrlShift, StringComparison.Ordinal);
+            _hotkeyAltZ.Checked = string.Equals(hotkey, Settings.HotkeyAltZ, StringComparison.Ordinal);
+            Ui.Loading = false;
 
-        private void AddCombo(Control parent, string text, int x, int y, int width)
-        {
-            ComboBox combo = new ComboBox();
-            combo.DropDownStyle = ComboBoxStyle.DropDownList;
-            combo.Items.Add(text);
-            combo.SelectedIndex = 0;
-            combo.Location = new Point(x, y);
-            combo.Size = new Size(width, 23);
-
-            // Bảng mã Unicode là cố định trong bản này; kiểu gõ đã chọn được bằng AddChoice.
-            combo.Enabled = false;
-            parent.Controls.Add(combo);
-        }
-
-        private ComboBox AddChoice(Control parent, string[] items, int x, int y, int width, int selected,
-            Action<int> apply)
-        {
-            ComboBox combo = new ComboBox();
-            combo.DropDownStyle = ComboBoxStyle.DropDownList;
-            combo.Items.AddRange(items);
-            combo.SelectedIndex = selected;
-            combo.Location = new Point(x, y);
-            combo.Size = new Size(width, 23);
-            combo.SelectedIndexChanged += delegate
-            {
-                if (_loading) return;
-                if (apply != null) apply(combo.SelectedIndex);
-                ApplyChanged();
-            };
-            parent.Controls.Add(combo);
-            return combo;
-        }
-
-        private RadioButton AddRadio(Control parent, string text, int x, int y, int width, string hotkey)
-        {
-            RadioButton radio = new RadioButton();
-            radio.Text = text;
-            radio.Location = new Point(x, y);
-            radio.Size = new Size(width, 21);
-            radio.CheckedChanged += delegate
-            {
-                if (_loading || !radio.Checked) return;
-                Settings.Hotkey = hotkey;
-                ApplyChanged();
-            };
-            parent.Controls.Add(radio);
-            return radio;
-        }
-
-        private CheckBox AddCheck(Control parent, string text, int x, int y, int width,
-            bool supported, Action<bool> apply)
-        {
-            CheckBox box = new CheckBox();
-            box.Text = text;
-            box.Location = new Point(x, y);
-            box.Size = new Size(width, 21);
-            box.Enabled = supported;
-            box.CheckedChanged += delegate
-            {
-                if (_loading) return;
-                if (apply != null) apply(box.Checked);
-                ApplyChanged();
-            };
-            parent.Controls.Add(box);
-            return box;
-        }
-
-        private void AddButton(Control parent, string text, int x, int y, int width, int height,
-            EventHandler onClick, bool supported)
-        {
-            Button button = new Button();
-            button.Text = text;
-            button.Location = new Point(x, y);
-            button.Size = new Size(width, height);
-            button.Enabled = supported;
-            if (onClick != null) button.Click += onClick;
-            parent.Controls.Add(button);
+            ApplyChanged();
         }
 
         private void ApplyChanged()
@@ -231,18 +154,21 @@ namespace ThiTap
 
             if (!changed || actual != enabled)
             {
-                _loading = true;
+                Ui.Loading = true;
                 _autoStart.Checked = actual;
-                _loading = false;
+                Ui.Loading = false;
 
-                MessageBox.Show(this, "Không thay đổi được thiết lập khởi động cùng Windows.", "ThiTap",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DarkBox.Warn(this, "Khởi động cùng Windows",
+                    "Không thay đổi được thiết lập khởi động cùng Windows.");
+                return;
             }
+
+            ApplyChanged();
         }
 
         private void LoadValues()
         {
-            _loading = true;
+            Ui.Loading = true;
             try
             {
                 bool altZ = string.Equals(Settings.Hotkey, Settings.HotkeyAltZ, StringComparison.Ordinal);
@@ -263,7 +189,7 @@ namespace ThiTap
             }
             finally
             {
-                _loading = false;
+                Ui.Loading = false;
             }
         }
 
@@ -298,35 +224,32 @@ namespace ThiTap
 
         private void ShowHelp()
         {
-            MessageBox.Show(this,
+            DarkBox.Info(this, "Hướng dẫn gõ",
                 "Kiểu gõ Telex:\n" +
-                "  s = sắc, f = huyền, r = hỏi, x = ngã, j = nặng\n" +
-                "  z = bỏ dấu vừa đặt\n" +
-                "  aa = â, ee = ê, oo = ô, w = ư / ơ / ă, dd = đ\n" +
-                "  ww = w (bấm w hai lần khi muốn giữ đúng chữ w)\n" +
-                "  uo + w = ươ (nguowif → người)\n\n" +
+                "s = sắc, f = huyền, r = hỏi, x = ngã, j = nặng, z = bỏ dấu vừa đặt\n" +
+                "aa = â, ee = ê, oo = ô, w = ư / ơ / ă, dd = đ, [ = ư, ] = ơ\n" +
+                "ww = w (bấm w hai lần khi muốn giữ đúng chữ w)\n" +
+                "uo + w = ươ (nguowif → người)\n\n" +
                 "Kiểu gõ VNI:\n" +
-                "  1 = sắc, 2 = huyền, 3 = hỏi, 4 = ngã, 5 = nặng\n" +
-                "  0 = bỏ dấu\n" +
-                "  6 = â / ê / ô, 7 = ư / ơ, 8 = ă, 9 = đ\n" +
-                "  ví dụ: tie6ng1 → tiếng, d9u7o7ng2 → đường\n\n" +
+                "1 = sắc, 2 = huyền, 3 = hỏi, 4 = ngã, 5 = nặng, 0 = bỏ dấu\n" +
+                "6 = â / ê / ô, 7 = ư / ơ, 8 = ă, 9 = đ\n" +
+                "ví dụ: tie6ng1 → tiếng, d9u7o7ng2 → đường\n\n" +
+                "Từ không phải âm tiết tiếng Việt thì không bị bỏ dấu: WWindowws → Windows.\n\n" +
                 "Chuyển tiếng Việt / English:\n" +
-                "  Ctrl + Shift hoặc Alt + Z (chọn ở trên)\n" +
-                "  hoặc bấm chuột trái vào biểu tượng ở khay hệ thống.\n\n" +
-                "Gõ tắt: khai báo cặp khoá = nội dung trong bảng gõ tắt,\n" +
-                "  gõ khoá rồi bấm dấu cách để thay thế (ví dụ vn → Việt Nam).",
-                "Hướng dẫn", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                "Ctrl + Shift hoặc Alt + Z (chọn ở trên), hoặc bấm chuột trái vào biểu tượng\n" +
+                "ở khay hệ thống.\n\n" +
+                "Gõ tắt: khai báo cặp khoá = nội dung trong bảng gõ tắt, gõ khoá rồi bấm\n" +
+                "dấu cách để thay thế (ví dụ vn → Việt Nam).");
         }
 
         private void ShowAbout()
         {
-            MessageBox.Show(this,
-                "ThiTap 1.0\nBộ gõ tiếng Việt cá nhân cho Windows.\n\n" +
+            DarkBox.Info(this, "Thông tin",
+                "ThiTap 1.0 — bộ gõ tiếng Việt cá nhân cho Windows.\n" +
                 "Tác giả: Ông Thi\n" +
                 "Bảng mã: Unicode dựng sẵn\n" +
                 "Kiểu gõ: " + (Settings.VniMode ? "VNI" : "Telex") + "\n\n" +
-                "Cài đặt lưu tại:\n" + Settings.SettingsPath,
-                "Thông tin", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                "Cài đặt lưu tại: " + Settings.SettingsPath);
         }
 
         /// <summary>Nút X chỉ ẩn hộp thoại; chương trình vẫn chạy dưới khay hệ thống.</summary>

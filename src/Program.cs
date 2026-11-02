@@ -16,13 +16,15 @@ namespace ThiTap
             {
                 if (!created)
                 {
-                    MessageBox.Show("ThiTap đang chạy sẵn ở khay hệ thống.", "ThiTap",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    DarkBox.Info(null, "ThiTap", "ThiTap đang chạy sẵn ở khay hệ thống.");
                     return;
                 }
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+
+                // Giao diện tối: báo cho Windows biết để phần hệ thống vẽ cũng dùng màu tối.
+                Theme.EnableSystemDarkMode();
 
                 // "ThiTap.exe --config": mở thẳng hộp thoại cấu hình khi khởi động.
                 bool showConfig = Array.IndexOf(args, "--config") >= 0;

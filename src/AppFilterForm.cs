@@ -12,15 +12,13 @@ namespace ThiTap
     /// </summary>
     internal sealed class AppFilterForm : Form
     {
-        private CheckedListBox _list;
+        private DarkCheckList _list;
         private TextBox _manual;
         private Label _status;
 
         public AppFilterForm()
         {
             Text = "Tắt tiếng Việt theo ứng dụng - ThiTap";
-            Font = new Font("Segoe UI", 9f);
-            ClientSize = new Size(420, 430);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -28,67 +26,36 @@ namespace ThiTap
             AutoScaleMode = AutoScaleMode.None;
             ShowInTaskbar = false;
 
+            Theme.Apply(this);
+
             BuildUi();
             LoadRunning();
         }
 
         private void BuildUi()
         {
-            Label hint = new Label();
-            hint.Text = "Đánh dấu những ứng dụng cần tắt tiếng Việt:";
-            hint.Location = new Point(12, 10);
-            hint.Size = new Size(396, 18);
-            Controls.Add(hint);
+            const int left = Ui.Pad;
+            const int width = 428;
 
-            _list = new CheckedListBox();
-            _list.Location = new Point(12, 32);
-            _list.Size = new Size(396, 280);
-            _list.IntegralHeight = false;
-            _list.CheckOnClick = true;
-            Controls.Add(_list);
+            Ui.Note(this, "Đánh dấu những ứng dụng cần tắt tiếng Việt:", left, 14, width);
 
-            Label manualLabel = new Label();
-            manualLabel.Text = "Thêm tên khác:";
-            manualLabel.Location = new Point(12, 322);
-            manualLabel.Size = new Size(92, 18);
-            Controls.Add(manualLabel);
+            _list = Ui.CheckList(this, left, 40, width, 300);
 
-            _manual = new TextBox();
-            _manual.Location = new Point(108, 318);
-            _manual.Size = new Size(200, 23);
-            Controls.Add(_manual);
+            Ui.Label(this, "Thêm tên khác", left, 352, 90);
+            _manual = Ui.TextField(this, left + 94, 348, 190, 28);
+            Ui.Button(this, "Thêm", left + 294, 346, 88, 30, delegate { AddManual(); });
 
-            Button add = new Button();
-            add.Text = "Thêm";
-            add.Location = new Point(316, 318);
-            add.Size = new Size(92, 24);
-            add.Click += delegate { AddManual(); };
-            Controls.Add(add);
-
-            Button save = new Button();
-            save.Text = "Lưu";
-            save.Location = new Point(12, 352);
-            save.Size = new Size(100, 28);
-            save.Click += delegate { SaveList(); };
-            Controls.Add(save);
-
-            Button close = new Button();
-            close.Text = "Đóng";
-            close.Location = new Point(308, 352);
-            close.Size = new Size(100, 28);
-            close.Click += delegate
+            Ui.Button(this, "Lưu", left, 388, 100, 30, delegate { SaveList(); });
+            Ui.PrimaryButton(this, "Đóng", left + width - 100, 388, 100, 30, delegate
             {
                 SaveList();
                 Close();
-            };
-            Controls.Add(close);
+            });
 
-            _status = new Label();
-            _status.Location = new Point(12, 386);
-            _status.Size = new Size(396, 32);
-            _status.ForeColor = SystemColors.GrayText;
-            _status.Text = "Chưa thay đổi. Danh sách lưu tại: " + AppFilter.FilePath;
-            Controls.Add(_status);
+            _status = Ui.Paragraph(this,
+                "Chưa thay đổi. Danh sách lưu tại: " + AppFilter.FilePath, left, 426, width);
+
+            ClientSize = new Size(left * 2 + width, _status.Bottom + Ui.Pad);
         }
 
         /// <summary>Các tiến trình đang chạy cộng với tên đã lưu, bỏ trùng.</summary>
@@ -127,11 +94,11 @@ namespace ThiTap
             names.Sort(StringComparer.OrdinalIgnoreCase);
 
             _list.BeginUpdate();
-            _list.Items.Clear();
+            _list.ClearItems();
             for (int i = 0; i < names.Count; i++)
             {
                 bool disable = AppFilter.IsDisabledFor(names[i]);
-                _list.Items.Add(names[i], disable);
+                _list.AddItem(names[i], disable);
             }
             _list.EndUpdate();
         }
@@ -151,28 +118,23 @@ namespace ThiTap
             {
                 if (string.Equals((string)_list.Items[i], name, StringComparison.OrdinalIgnoreCase))
                 {
-                    _list.SetItemChecked(i, true);
+                    _list.SetChecked(i, true);
                     _status.Text = "Đã đánh dấu \"" + name + "\".";
                     _manual.Text = string.Empty;
                     return;
                 }
             }
 
-            _list.Items.Add(name, true);
+            _list.AddItem(name, true);
             _manual.Text = string.Empty;
             _status.Text = "Đã thêm \"" + name + "\".";
         }
 
         private void SaveList()
         {
-            List<string> names = new List<string>();
-            for (int i = 0; i < _list.Items.Count; i++)
-            {
-                if (_list.GetItemChecked(i)) names.Add((string)_list.Items[i]);
-            }
-
-            AppFilter.Set(names.ToArray());
-            _status.Text = "Đã lưu " + names.Count + " ứng dụng tắt tiếng Việt.";
+            string[] names = _list.CheckedNames();
+            AppFilter.Set(names);
+            _status.Text = "Đã lưu " + names.Length + " ứng dụng tắt tiếng Việt.";
         }
     }
 }

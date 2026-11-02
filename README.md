@@ -24,6 +24,24 @@ Bản chạy sẵn (không cần cài đặt): [ThiTap 1.0 — ThiTap-1.0-win64.
 - **Biểu tượng khay đổi theo chế độ**: cờ Việt Nam (đỏ, sao vàng) khi gõ tiếng Việt, cờ Liên hiệp Anh (Union Jack) khi dùng tiếng Anh.
 - **Khởi động cùng Windows** bằng một mục trong menu khay.
 - **Cấu hình portable**: `settings.ini` nằm cạnh `ThiTap.exe` (nếu không ghi được thì dùng `%APPDATA%\ThiTap`).
+- **Giao diện tối** kiểu Windows 11: card bo góc trên nền `#202020`, chữ `#F3F3F3`, nhấn `#4CC2FF` — áp cho cả menu khay và hộp thoại thông báo.
+
+## Giao diện
+
+Mọi cửa sổ (cấu hình, bảng gõ tắt, bật/tắt theo ứng dụng, hộp thoại thông báo, menu khay) dùng tông tối và được vẽ tay bằng GDI+, không cần thư viện ngoài nên vẫn build được chỉ với `csc.exe` của .NET Framework.
+
+| Thành phần | Màu |
+| --- | --- |
+| Nền form | `#202020` |
+| Nền card, menu khay | `#2B2B2B` |
+| Nền ô nhập | `#1F1F1F` |
+| Nền nút | `#323232` (rê chuột `#3C3C3C`) |
+| Chữ chính | `#F3F3F3` |
+| Chữ phụ | `#A0A0A0` |
+| Nhấn (accent) | `#4CC2FF` (rê chuột `#60CDFF`) |
+| Viền | `#3D3D3D` (rê chuột `#555555`) |
+
+Phân cấp thị giác dựa vào độ sáng của từng lớp nền (form → card → ô nhập) cộng viền 1px mảnh, không dùng đường kẻ đậm; các khối bo góc mềm (card 10px, nút và ô nhập 7px, ô đánh dấu 4px). Thanh tiêu đề, thanh cuộn và menu ngữ cảnh của Windows cũng được đưa sang tối.
 
 ## Bảng phím
 
@@ -162,6 +180,8 @@ assets\ThiTap.ico    icon nhúng trong file exe
 src\Engine\          lõi gõ: TelexEngine, bảng chữ Vietnamese, danh sách từ tiếng Anh
 src\Input\           hook bàn phím (WH_KEYBOARD_LL) và bộ gửi phím
 src\                 host WinForms: khay hệ thống, hộp thoại cấu hình, cài đặt, tự khởi động
+src\Theme.cs, Ui.cs, DarkControls.cs, DarkBox.cs
+                     bảng màu tối và bộ control tự vẽ dùng chung
 tools\               TelexTest (kiểm thử), MakeIcon (sinh icon)
 ```
 

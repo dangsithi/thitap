@@ -36,6 +36,12 @@ namespace ThiTap
             exitItem.Click += delegate { ExitApp(); };
 
             ContextMenuStrip menu = new ContextMenuStrip();
+            menu.Renderer = new DarkMenuRenderer();
+            menu.BackColor = Theme.Card;
+            menu.ForeColor = Theme.Text;
+            menu.Font = Theme.Body;
+            menu.ShowCheckMargin = true;
+            menu.ShowImageMargin = false;
             menu.Items.Add(_toggleItem);
             menu.Items.Add(configItem);
             menu.Items.Add(_autoStartItem);
@@ -99,8 +105,8 @@ namespace ThiTap
 
             if (!ok)
             {
-                MessageBox.Show("Không thay đổi được thiết lập khởi động cùng Windows.", "ThiTap",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DarkBox.Warn(null, "Khởi động cùng Windows",
+                    "Không thay đổi được thiết lập khởi động cùng Windows.");
             }
         }
 

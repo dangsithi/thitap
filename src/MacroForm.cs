@@ -6,22 +6,19 @@ namespace ThiTap
 {
     /// <summary>
     /// Soạn bảng gõ tắt: gõ khoá rồi bấm dấu cách để thay bằng nội dung tương ứng.
-    /// Mọi thay đổi ghi ngay vào macros.txt.
+    /// Giao diện tối cùng bộ màu với hộp thoại cấu hình; mọi thay đổi ghi ngay vào macros.txt.
     /// </summary>
     internal sealed class MacroForm : Form
     {
         private ListBox _list;
         private TextBox _trigger;
         private TextBox _replacement;
-        private Button _save;
-        private Button _remove;
         private Label _status;
 
         public MacroForm()
         {
             Text = "Bảng gõ tắt - ThiTap";
-            Font = new Font("Segoe UI", 9f);
-            ClientSize = new Size(440, 350);
+            ClientSize = new Size(480, 384);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -29,80 +26,34 @@ namespace ThiTap
             AutoScaleMode = AutoScaleMode.None;
             ShowInTaskbar = false;
 
+            Theme.Apply(this);
+
             BuildUi();
             Reload();
         }
 
         private void BuildUi()
         {
-            Label hint = new Label();
-            hint.Text = "Gõ từ khoá rồi bấm dấu cách để thay bằng nội dung bên phải.";
-            hint.Location = new Point(12, 10);
-            hint.Size = new Size(416, 18);
-            Controls.Add(hint);
+            const int left = Ui.Pad;
+            const int width = 448;
 
-            _list = new ListBox();
-            _list.Location = new Point(12, 32);
-            _list.Size = new Size(416, 180);
-            _list.IntegralHeight = false;
+            Ui.Note(this, "Gõ từ khoá rồi bấm dấu cách để thay bằng nội dung bên phải.", left, 14, width);
+
+            _list = Ui.List(this, left, 40, width, 200);
             _list.SelectedIndexChanged += delegate { LoadSelected(); };
-            Controls.Add(_list);
 
-            Label triggerLabel = new Label();
-            triggerLabel.Text = "Từ khoá:";
-            triggerLabel.Location = new Point(12, 226);
-            triggerLabel.Size = new Size(60, 18);
-            Controls.Add(triggerLabel);
+            Ui.Label(this, "Từ khoá", left, 252, 56);
+            _trigger = Ui.TextField(this, left + 60, 248, 130, 28);
 
-            _trigger = new TextBox();
-            _trigger.Location = new Point(76, 222);
-            _trigger.Size = new Size(110, 23);
-            Controls.Add(_trigger);
+            Ui.Label(this, "Thay bằng", left + 200, 252, 70);
+            _replacement = Ui.TextField(this, left + 274, 248, 174, 28);
 
-            Label replacementLabel = new Label();
-            replacementLabel.Text = "Thay bằng:";
-            replacementLabel.Location = new Point(196, 226);
-            replacementLabel.Size = new Size(72, 18);
-            Controls.Add(replacementLabel);
+            Ui.Button(this, "Thêm / Sửa", left, 286, 116, 30, delegate { SaveEntry(); });
+            Ui.Button(this, "Xoá", left + 124, 286, 88, 30, delegate { RemoveEntry(); });
+            Ui.PrimaryButton(this, "Đóng", left + width - 96, 286, 96, 30, delegate { Close(); });
 
-            _replacement = new TextBox();
-            _replacement.Location = new Point(270, 222);
-            _replacement.Size = new Size(158, 23);
-            Controls.Add(_replacement);
-
-            _save = new Button();
-            _save.Text = "Thêm / Sửa";
-            _save.Location = new Point(12, 254);
-            _save.Size = new Size(110, 28);
-            _save.Click += delegate { SaveEntry(); };
-            Controls.Add(_save);
-
-            _remove = new Button();
-            _remove.Text = "Xoá";
-            _remove.Location = new Point(128, 254);
-            _remove.Size = new Size(80, 28);
-            _remove.Click += delegate { RemoveEntry(); };
-            Controls.Add(_remove);
-
-            Button close = new Button();
-            close.Text = "Đóng";
-            close.Location = new Point(348, 254);
-            close.Size = new Size(80, 28);
-            close.Click += delegate { Close(); };
-            Controls.Add(close);
-
-            _status = new Label();
-            _status.Location = new Point(12, 292);
-            _status.Size = new Size(416, 18);
-            _status.ForeColor = SystemColors.GrayText;
-            Controls.Add(_status);
-
-            Label path = new Label();
-            path.Text = "Lưu tại: " + MacroStore.FilePath;
-            path.Location = new Point(12, 312);
-            path.Size = new Size(416, 18);
-            path.ForeColor = SystemColors.GrayText;
-            Controls.Add(path);
+            _status = Ui.Note(this, string.Empty, left, 326, width);
+            Ui.Note(this, "Lưu tại: " + MacroStore.FilePath, left, 346, width);
         }
 
         private void Reload()
