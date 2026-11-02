@@ -120,7 +120,7 @@ Script dùng `csc.exe` của .NET Framework và tự thêm BOM UTF-8 cho mọi f
 `bin/` bị `.gitignore` bỏ qua, nên file chạy sẵn không nằm trong repo mà được đưa lên **Releases**.
 
 1. Build và kiểm thử: `.\build.ps1 -Test` phải in `TẤT CẢ ĐỀU ĐÚNG`.
-2. Đóng gói (chỉ ba file này, không kèm `settings.ini` để người dùng mới tự sinh):
+2. Đóng gói (chỉ ba file này, không kèm `settings.ini` để người dùng mới tự sinh). Làm bước này **sau** khi commit mọi thay đổi README để bản zip chứa README mới nhất:
 
    ```powershell
    Compress-Archive -Path bin\ThiTap.exe, README.md, LICENSE -DestinationPath bin\ThiTap-<version>-win64.zip -Force
@@ -133,8 +133,8 @@ Mục **Tải về** ở đầu README trỏ tới `/releases/latest` nên khôn
 
 ### Lịch sử phát hành
 
-- **v1.1** — `ThiTap-1.1-win64.zip` (43.116 byte): sửa lỗi đặt dấu sai sau khi bấm Backspace rồi gõ tiếp (`hội` → xoá → `ij` ra `hộị` như bản cũ, nay ra `hội`).
-- **v1.0** — `ThiTap-1.0-win64.zip` (42.294 byte): bản đầu tiên, Telex + VNI, biểu tượng khay cờ Việt Nam / cờ Liên hiệp Anh, bỏ thông báo khi chuyển ngôn ngữ, luật gõ `ww` = `w`.
+- **v1.1** — `ThiTap-1.1-win64.zip`: sửa lỗi đặt dấu sai sau khi bấm Backspace rồi gõ tiếp (`hội` → xoá → `ij` ra `hộị` như bản cũ, nay ra `hội`).
+- **v1.0** — `ThiTap-1.0-win64.zip`: bản đầu tiên, Telex + VNI, biểu tượng khay cờ Việt Nam / cờ Liên hiệp Anh, bỏ thông báo khi chuyển ngôn ngữ, luật gõ `ww` = `w`.
 
 ## Kiểm thử
 
