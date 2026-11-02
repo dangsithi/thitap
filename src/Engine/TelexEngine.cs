@@ -100,6 +100,57 @@ namespace ThiTap.Engine
         }
 
         /// <summary>
+        /// Gọi khi người dùng bấm Backspace: ứng dụng tự xoá một ký tự, lõi gõ phải rút lại
+        /// phím thô tương ứng để những phím dấu gõ tiếp vẫn đặt đúng trên chữ còn lại
+        /// (gõ "hooij" ra "hội", xoá một chữ rồi gõ "j" thì phải ra "hộ").
+        /// </summary>
+        public void ProcessBackspace()
+        {
+            if (!Enabled)
+            {
+                // Chế độ tiếng Anh vẫn ghi nhớ phím để chạy gõ tắt: bỏ phím cuối là đủ.
+                if (MacroWhenDisabled && MacroLookup != null && _raw.Count > 0)
+                {
+                    _raw.RemoveAt(_raw.Count - 1);
+                    _onScreen = RawLetters();
+                }
+                else
+                {
+                    ResetWord();
+                }
+                return;
+            }
+
+            if (_raw.Count == 0)
+            {
+                ResetWord();
+                return;
+            }
+
+            // Sau một lần Backspace, ứng dụng còn hiển thị đúng một chữ ít hơn.
+            string before = _onScreen;
+            int target = before.Length - 1;
+            _onScreen = target > 0 ? before.Substring(0, target) : string.Empty;
+
+            while (_raw.Count > 0)
+            {
+                _raw.RemoveAt(_raw.Count - 1);
+                // Đếm theo số chữ thật sự tạo ra ("dd" chỉ là "đ") chứ không theo chuỗi đang hiển thị,
+                // vì từ chưa hợp lệ được hiển thị nguyên phím thô nên dài hơn số chữ.
+                if (LetterCount() <= target) break;
+            }
+        }
+
+        /// <summary>Số chữ mà chuỗi phím thô hiện tại tạo ra (không tính phím dấu đã bị nuốt).</summary>
+        private int LetterCount()
+        {
+            List<PlainChar> plain = new List<PlainChar>();
+            bool ignored;
+            Parse(plain, out ignored);
+            return plain.Count;
+        }
+
+        /// <summary>
         /// Xử lý một phím gõ vào từ: chữ cái a-z ở kiểu Telex, thêm chữ số 0-9 ở kiểu VNI
         /// (upper là trạng thái Shift/CapsLock, luôn false với chữ số).
         /// </summary>

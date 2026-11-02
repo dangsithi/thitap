@@ -99,6 +99,25 @@ namespace ThiTap.Test
             Check("asd", "asd");
             Check("xin", "xin");
 
+            // Xoá lui rồi gõ tiếp: phím dấu phải đặt lại lên chữ còn lại,
+            // không được để ký tự thô rơi ra ngoài ("hô" + "ji" thành "hôji").
+            BackspaceCheck("hooij", 1, "", "hộ");
+            BackspaceCheck("hooij", 1, "j", "hộ");
+            BackspaceCheck("hooij", 1, "ij", "hội");
+            BackspaceCheck("hooij", 2, "i", "hi");
+            BackspaceCheck("as", 1, "as", "á");
+            BackspaceCheck("dd", 1, "d", "dd");
+            BackspaceCheck("dd", 2, "d", "d");
+            BackspaceCheck("dda", 1, "a", "đa");
+            BackspaceCheck("vieetj", 1, "tj", "việt");
+            BackspaceCheck("xin", 1, "n", "xin");
+            BackspaceCheck("tieengs", 1, "gs", "tiếng");
+            BackspaceCheck("nguowif", 1, "", null);
+            BackspaceCheck("dduowcj", 1, "", null);
+            BackspaceCheckVni("hom2", 1, "m2", "hòm");
+            BackspaceCheckVni("bua1", 1, "a1", "búa");
+            BackspaceCheckVni("vie6t5", 1, "t5", "việt");
+
             // Đoạn văn đầy đủ dấu (không kèm dấu câu: dấu câu do tầng bàn phím xử lý).
             Sentence(
                 "Tooi ddang vieets ddoanj vawn nayf ddeer kieemr tra booj gox tieengs Vieetj",
@@ -349,6 +368,85 @@ namespace ThiTap.Test
             Console.WriteLine("SAI: gõ \"" + keys + "\"");
             Console.WriteLine("   mong đợi: " + expected + "  " + Codes(expected));
             Console.WriteLine("   thực tế : " + actual + "  " + Codes(actual));
+        }
+
+        /// <summary>Gõ một chuỗi phím và mô phỏng lại đúng những gì ứng dụng hiển thị.</summary>
+        private static string ApplyKeys(TelexEngine engine, string screen, string keys)
+        {
+            for (int i = 0; i < keys.Length; i++)
+            {
+                char key = char.ToLowerInvariant(keys[i]);
+                bool upper = char.IsUpper(keys[i]);
+                KeyResult result = engine.ProcessLetter(key, upper);
+
+                if (!result.Handled)
+                {
+                    // Phím đi nguyên vẹn qua ứng dụng.
+                    screen += upper ? char.ToUpperInvariant(key) : key;
+                    continue;
+                }
+
+                if (result.Backspaces > screen.Length)
+                {
+                    _failed++;
+                    Console.WriteLine("SAI: lõi gõ xin xoá " + result.Backspaces
+                        + " chữ nhưng màn hình chỉ có \"" + screen + "\"");
+                    return screen;
+                }
+
+                screen = screen.Substring(0, screen.Length - result.Backspaces);
+                if (!string.IsNullOrEmpty(result.Text)) screen += result.Text;
+            }
+
+            return screen;
+        }
+
+        /// <summary>
+        /// Kiểm chuỗi gõ có bấm Backspace giữa chừng: gõ <paramref name="keys"/>, xoá
+        /// <paramref name="deletes"/> lần, gõ tiếp <paramref name="more"/> rồi so chữ trên màn hình.
+        /// expected = null nghĩa là chỉ yêu cầu lõi gõ còn đúng số chữ đang hiển thị.
+        /// </summary>
+        private static void BackspaceCheck(string keys, int deletes, string more, string expected)
+        {
+            RunBackspace(new TelexEngine(), keys, deletes, more, expected);
+        }
+
+        /// <summary>Như BackspaceCheck nhưng gõ theo kiểu VNI.</summary>
+        private static void BackspaceCheckVni(string keys, int deletes, string more, string expected)
+        {
+            TelexEngine engine = new TelexEngine();
+            engine.Vni = true;
+            RunBackspace(engine, keys, deletes, more, expected);
+        }
+
+        private static void RunBackspace(TelexEngine engine, string keys, int deletes, string more, string expected)
+        {
+            string screen = ApplyKeys(engine, string.Empty, keys);
+
+            for (int i = 0; i < deletes; i++)
+            {
+                engine.ProcessBackspace();
+                if (screen.Length > 0) screen = screen.Substring(0, screen.Length - 1);
+
+                if (engine.CurrentWord.Length != screen.Length)
+                {
+                    _failed++;
+                    Console.WriteLine("SAI Backspace: \"" + keys + "\" xoá " + (i + 1) + " lần");
+                    Console.WriteLine("   màn hình: \"" + screen + "\" (" + screen.Length + " chữ)  " + Codes(screen));
+                    Console.WriteLine("   lõi gõ  : \"" + engine.CurrentWord + "\" (" + engine.CurrentWord.Length + " chữ)  " + Codes(engine.CurrentWord));
+                    return;
+                }
+            }
+
+            screen = ApplyKeys(engine, screen, more);
+            if (expected == null) return;
+
+            if (string.Equals(screen, expected, StringComparison.Ordinal)) return;
+
+            _failed++;
+            Console.WriteLine("SAI Backspace: \"" + keys + "\" xoá " + deletes + " lần rồi gõ \"" + more + "\"");
+            Console.WriteLine("   mong đợi: " + expected + "  " + Codes(expected));
+            Console.WriteLine("   thực tế : " + screen + "  " + Codes(screen));
         }
 
         private static string Codes(string text)

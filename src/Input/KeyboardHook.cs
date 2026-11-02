@@ -16,6 +16,7 @@ namespace ThiTap.Input
         private const int VkControl = 0x11;
         private const int VkMenu = 0x12;
         private const int VkCapital = 0x14;
+        private const int VkBack = 0x08;
         private const int VkZ = 0x5A;
         private const int VkLShift = 0xA0;
         private const int VkRShift = 0xA1;
@@ -172,6 +173,14 @@ namespace ThiTap.Input
             if (IsAppDisabled())
             {
                 _engine.ResetWord();
+                return false;
+            }
+
+            // Backspace: ứng dụng tự xoá một ký tự, chỉ cần bảo lõi gõ rút lại phím thô theo,
+            // nếu xoá trắng luôn thì lần gõ tiếp theo phím dấu sẽ bị dính ra ngoài chữ ("hôji").
+            if (virtualKey == VkBack)
+            {
+                _engine.ProcessBackspace();
                 return false;
             }
 

@@ -16,6 +16,7 @@ Bản chạy sẵn (không cần cài đặt): [ThiTap 1.0 — ThiTap-1.0-win64.
 - **Bảng mã Unicode dựng sẵn** — dán được vào mọi ứng dụng hiện đại.
 - **Gõ tắt** theo bảng khoá → nội dung, mở rộng khi gõ dấu cách hoặc dấu câu.
 - **Tự động khôi phục phím tiếng Anh**: gõ `test` không bị biến thành `tést`.
+- **Xoá lui rồi gõ tiếp vẫn đúng**: bấm Backspace giữa chữ (vd. `hội` → `hộ`) thì phím dấu gõ tiếp theo đặt lại trên chữ còn lại, không bị dính `j`, `s`, `f`... ra ngoài.
 - **Luôn dùng clipboard cho Unicode** cho ứng dụng không nhận `SendInput` Unicode.
 - **Bật/tắt theo từng ứng dụng**: khai báo danh sách tiến trình không muốn gõ tiếng Việt.
 - **Chuyển tiếng Việt / English** bằng `Ctrl + Shift`, `Alt + Z` hoặc bấm chuột trái vào biểu tượng ở khay.
@@ -136,8 +137,9 @@ Bản hiện tại: [v1.0](https://github.com/dangsithi/thitap/releases/tag/v1.0
 
 `bin\TelexTest.exe` (do `build.ps1 -Test` sinh ra) chạy hoàn toàn ở mức lõi gõ, không cần bàn phím thật:
 
-- 83 từ và 4 câu Telex;
+- 78 từ và 4 câu Telex;
 - 30 từ và 2 câu VNI;
+- 13 chuỗi Telex và 3 chuỗi VNI có bấm Backspace giữa chừng (mô phỏng cả màn hình lẫn lõi gõ);
 - gõ tắt (mở rộng đúng, không mở rộng khi tắt);
 - khôi phục phím tiếng Anh (có và không được khôi phục).
 
