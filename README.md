@@ -15,6 +15,7 @@ Hỗ trợ **Telex** và **VNI**, xuất **Unicode dựng sẵn**, có gõ tắt
 - **Luôn dùng clipboard cho Unicode** cho ứng dụng không nhận `SendInput` Unicode.
 - **Bật/tắt theo từng ứng dụng**: khai báo danh sách tiến trình không muốn gõ tiếng Việt.
 - **Chuyển tiếng Việt / English** bằng `Ctrl + Shift`, `Alt + Z` hoặc bấm chuột trái vào biểu tượng ở khay.
+- **Biểu tượng khay đổi theo chế độ**: cờ Việt Nam (đỏ, sao vàng) khi gõ tiếng Việt, cờ Anh (trắng, thánh giá đỏ) khi dùng tiếng Anh.
 - **Khởi động cùng Windows** bằng một mục trong menu khay.
 - **Cấu hình portable**: `settings.ini` nằm cạnh `ThiTap.exe` (nếu không ghi được thì dùng `%APPDATA%\ThiTap`).
 
@@ -53,7 +54,7 @@ Ví dụ: `tie6ng1 Vie6t5` → tiếng Việt, `d9u7o7ng2` → đường.
 ## Sử dụng
 
 1. Tải `ThiTap.exe` (hoặc tự build, xem bên dưới) và đặt vào một thư mục bất kỳ.
-2. Chạy `ThiTap.exe` — biểu tượng chữ **V** (đỏ) hoặc **E** (xanh) xuất hiện ở khay hệ thống.
+2. Chạy `ThiTap.exe` — biểu tượng ở khay hệ thống là cờ Việt Nam (đỏ, sao vàng); khi chuyển sang English, biểu tượng đổi thành cờ Anh (trắng, thánh giá đỏ).
 3. Bấm chuột trái vào biểu tượng để chuyển nhanh giữa tiếng Việt và English.
 4. Bấm chuột phải để mở **Cấu hình...**, bật **Khởi động cùng Windows** hoặc **Thoát**.
 
