@@ -17,7 +17,6 @@ namespace ThiTap.Input
         private const int VkMenu = 0x12;
         private const int VkCapital = 0x14;
         private const int VkBack = 0x08;
-        private const int VkZ = 0x5A;
         private const int VkOpenBracket = 0xDB;
         private const int VkCloseBracket = 0xDD;
         private const int VkLShift = 0xA0;
@@ -69,7 +68,9 @@ namespace ThiTap.Input
         private readonly Action _toggle;
         private readonly HookProc _proc;
         private IntPtr _hook = IntPtr.Zero;
-        private long _lastToggle;
+        private uint _lastToggle;
+        private string _hotkeyText;
+        private Hotkey _hotkey;
         private IntPtr _filterWindow = IntPtr.Zero;
         private bool _filterAllowed = true;
         private int _filterVersion = -1;
@@ -131,6 +132,43 @@ namespace ThiTap.Input
 
         private bool HandleKey(int virtualKey)
         {
+            bool shift = IsDown(VkShift);
+            bool control = IsDown(VkControl);
+            bool alt = IsDown(VkMenu);
+            bool win = IsDown(VkLWin) || IsDown(VkRWin);
+
+            // Hook chạy trước khi Windows cập nhật trạng thái phím vừa bấm, nên chính phím
+            // đang xử lý phải được tính là đang giữ. Nếu không, Ctrl + Shift không bao giờ khớp
+            // vì lúc Shift xuống thì GetAsyncKeyState còn trả về "chưa bấm".
+            if (virtualKey == VkShift || virtualKey == VkLShift || virtualKey == VkRShift)
+            {
+                shift = true;
+            }
+            else if (virtualKey == VkControl || virtualKey == VkLControl || virtualKey == VkRControl)
+            {
+                control = true;
+            }
+            else if (virtualKey == VkMenu || virtualKey == VkLMenu || virtualKey == VkRMenu)
+            {
+                alt = true;
+            }
+            else if (virtualKey == VkLWin || virtualKey == VkRWin)
+            {
+                win = true;
+            }
+
+            // Phím chuyển ngôn ngữ chạy cả khi con trỏ đang ở trong hộp thoại của ThiTap.
+            // Lúc hộp thoại cấu hình đang chờ bắt tổ hợp mới thì tạm bỏ qua.
+            if (!HotkeyCapture.Active)
+            {
+                Hotkey hotkey = CurrentHotkey();
+                if (hotkey.Matched(control, alt, shift, win, virtualKey))
+                {
+                    ToggleIfReady();
+                    return hotkey.HasKey;
+                }
+            }
+
             // Đang gõ trong chính hộp thoại của ThiTap thì để nguyên, không biến đổi gì.
             if (IsOwnWindowFocused())
             {
@@ -138,30 +176,11 @@ namespace ThiTap.Input
                 return false;
             }
 
-            bool shift = IsDown(VkShift);
-            bool control = IsDown(VkControl);
-            bool alt = IsDown(VkMenu);
-
-            // Phím chuyển ngôn ngữ: CTRL + SHIFT hoặc ALT + Z tuỳ cài đặt.
-            if (string.Equals(Settings.Hotkey, Settings.HotkeyAltZ, StringComparison.Ordinal))
-            {
-                if (alt && !control && virtualKey == VkZ)
-                {
-                    ToggleIfReady();
-                    return true;
-                }
-            }
-
             if (virtualKey == VkLShift || virtualKey == VkRShift
                 || virtualKey == VkLControl || virtualKey == VkRControl
                 || virtualKey == VkLMenu || virtualKey == VkRMenu
                 || virtualKey == VkCapital || virtualKey == VkLWin || virtualKey == VkRWin)
             {
-                if (!string.Equals(Settings.Hotkey, Settings.HotkeyAltZ, StringComparison.Ordinal)
-                    && control && shift && (virtualKey == VkLShift || virtualKey == VkRShift))
-                {
-                    ToggleIfReady();
-                }
                 return false;
             }
 
@@ -214,10 +233,28 @@ namespace ThiTap.Input
 
         private void ToggleIfReady()
         {
-            long now = Environment.TickCount;
-            if (now - _lastToggle < 400) return;
+            // Environment.TickCount quay vòng sau 49,7 ngày và có lúc trả về số âm, nên phải
+            // tính hiệu bằng số không dấu; so sánh có dấu kiểu cũ làm phím tắt chết hẳn
+            // sau khi máy chạy được khoảng 25 ngày.
+            uint now = unchecked((uint)Environment.TickCount);
+            if (unchecked(now - _lastToggle) < 400) return;
             _lastToggle = now;
             if (_toggle != null) _toggle();
+        }
+
+        /// <summary>
+        /// Tổ hợp phím đang cài, đọc lại khi settings.ini đổi (hộp thoại cấu hình ghi ngay),
+        /// nhưng không phải phân tích chuỗi ở mỗi lần gõ phím.
+        /// </summary>
+        private Hotkey CurrentHotkey()
+        {
+            string text = Settings.Hotkey;
+            if (!string.Equals(text, _hotkeyText, StringComparison.Ordinal))
+            {
+                _hotkeyText = text;
+                _hotkey = Hotkey.Parse(text);
+            }
+            return _hotkey;
         }
 
         /// <summary>Chốt từ hiện tại: thay bằng nội dung gõ tắt hoặc phím tiếng Anh nếu có.</summary>

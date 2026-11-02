@@ -33,8 +33,8 @@ namespace ThiTap
         {
             CardPanel card = new CardPanel();
             card.Header = header;
-            card.Location = new Point(x, y);
-            card.Size = new Size(width, height);
+            card.Location = new Point(Theme.S(x), Theme.S(y));
+            card.Size = new Size(Theme.S(width), Theme.S(height));
             parent.Controls.Add(card);
             return card;
         }
@@ -43,8 +43,8 @@ namespace ThiTap
         {
             FieldPanel field = new FieldPanel();
             field.BackColor = SurfaceBehind(parent);
-            field.Location = new Point(x, y);
-            field.Size = new Size(width, height);
+            field.Location = new Point(Theme.S(x), Theme.S(y));
+            field.Size = new Size(Theme.S(width), Theme.S(height));
             parent.Controls.Add(field);
             return field;
         }
@@ -67,8 +67,8 @@ namespace ThiTap
         /// <summary>Đoạn chú thích nhiều dòng: chiều cao tự tính theo bề rộng cho trước.</summary>
         public static Label Paragraph(Control parent, string text, int x, int y, int width)
         {
-            int height = MeasureHeight(text, Theme.Small, width);
-            return MakeLabel(parent, text, x, y, width, height, Theme.Small, Theme.SubText);
+            int height = MeasureHeight(text, Theme.Small, Theme.S(width));
+            return PlaceLabel(parent, text, x, y, width, height, Theme.Small, Theme.SubText);
         }
 
         public static int MeasureHeight(string text, Font font, int width)
@@ -80,10 +80,17 @@ namespace ThiTap
         private static Label MakeLabel(Control parent, string text, int x, int y, int width, int height,
             Font font, Color color)
         {
+            return PlaceLabel(parent, text, x, y, width, Theme.S(height), font, color);
+        }
+
+        /// <summary>Tạo nhãn với kích thước đã là điểm ảnh (bề cao đo được, không nhân tỉ lệ).</summary>
+        private static Label PlaceLabel(Control parent, string text, int x, int y, int width, int height,
+            Font font, Color color)
+        {
             Label label = new Label();
             label.Text = text;
-            label.Location = new Point(x, y);
-            label.Size = new Size(width, height);
+            label.Location = new Point(Theme.S(x), Theme.S(y));
+            label.Size = new Size(Theme.S(width), height);
             label.AutoSize = false;
             label.Font = font;
             label.ForeColor = color;
@@ -111,8 +118,8 @@ namespace ThiTap
             FlatButton button = new FlatButton();
             button.Text = text;
             button.Kind = primary ? ButtonKind.Primary : ButtonKind.Neutral;
-            button.Location = new Point(x, y);
-            button.Size = new Size(width, height);
+            button.Location = new Point(Theme.S(x), Theme.S(y));
+            button.Size = new Size(Theme.S(width), Theme.S(height));
             button.BackColor = SurfaceBehind(parent);
             if (onClick != null) button.Click += onClick;
             parent.Controls.Add(button);
@@ -130,8 +137,8 @@ namespace ThiTap
         {
             DarkCheckBox box = new DarkCheckBox();
             box.Text = text;
-            box.Location = new Point(x, y);
-            box.Size = new Size(width, 22);
+            box.Location = new Point(Theme.S(x), Theme.S(y));
+            box.Size = new Size(Theme.S(width), Theme.S(22));
             box.BackColor = SurfaceBehind(parent);
             box.Enabled = supported;
             box.Checked = value;
@@ -152,8 +159,8 @@ namespace ThiTap
         {
             DarkRadio radio = new DarkRadio();
             radio.Text = text;
-            radio.Location = new Point(x, y);
-            radio.Size = new Size(width, 22);
+            radio.Location = new Point(Theme.S(x), Theme.S(y));
+            radio.Size = new Size(Theme.S(width), Theme.S(22));
             radio.BackColor = SurfaceBehind(parent);
             radio.Checked = value;
             if (onSelect != null)
@@ -171,8 +178,8 @@ namespace ThiTap
             Action<int> onChange, bool enabled)
         {
             DarkComboBox combo = new DarkComboBox();
-            combo.Location = new Point(x, y);
-            combo.Width = width;
+            combo.Location = new Point(Theme.S(x), Theme.S(y));
+            combo.Width = Theme.S(width);
             combo.Enabled = enabled;
             if (items != null) combo.Items.AddRange(items);
             if (combo.Items.Count > 0) combo.SelectedIndex = Math.Max(0, Math.Min(selected, combo.Items.Count - 1));
@@ -197,8 +204,8 @@ namespace ThiTap
             box.BackColor = Theme.Field;
             box.ForeColor = Theme.Text;
             box.Font = Theme.Body;
-            box.Width = width - 20;
-            box.Location = new Point(10, Math.Max(1, (height - 16) / 2));
+            box.Width = Theme.S(width - 20);
+            box.Location = new Point(Theme.S(10), Math.Max(1, Theme.S((height - 16) / 2)));
             field.Controls.Add(box);
 
             field.HandleCreated += delegate { Theme.DarkScrollBar(field); };
@@ -221,8 +228,8 @@ namespace ThiTap
         private static ListBox FinishList(Control parent, ListBox list, int x, int y, int width, int height)
         {
             FieldPanel field = Field(parent, x, y, width, height);
-            list.Size = new Size(width - 6, height - 6);
-            list.Location = new Point(3, 3);
+            list.Size = new Size(Theme.S(width - 6), Theme.S(height - 6));
+            list.Location = new Point(Theme.S(3), Theme.S(3));
             field.Controls.Add(list);
 
             ClipInner(list);
@@ -232,7 +239,7 @@ namespace ThiTap
 
         private static void ClipInner(Control list)
         {
-            Theme.ClipRounded(list, Theme.FieldRadius - 2);
+            Theme.ClipRounded(list, Theme.S(Theme.FieldRadius - 2));
         }
     }
 }

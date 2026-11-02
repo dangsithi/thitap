@@ -55,7 +55,7 @@ namespace ThiTap
             _status = Ui.Paragraph(this,
                 "Chưa thay đổi. Danh sách lưu tại: " + AppFilter.FilePath, left, 426, width);
 
-            ClientSize = new Size(left * 2 + width, _status.Bottom + Ui.Pad);
+            ClientSize = new Size(Theme.S(left * 2 + width), _status.Bottom + Theme.S(Ui.Pad));
         }
 
         /// <summary>Các tiến trình đang chạy cộng với tên đã lưu, bỏ trùng.</summary>

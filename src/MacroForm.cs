@@ -18,7 +18,7 @@ namespace ThiTap
         public MacroForm()
         {
             Text = "Bảng gõ tắt - ThiTap";
-            ClientSize = new Size(480, 384);
+            ClientSize = new Size(Theme.S(480), Theme.S(384));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;

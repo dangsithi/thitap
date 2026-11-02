@@ -134,7 +134,8 @@ namespace ThiTap
             _toggleItem.Checked = vietnamese;
             _tray.Text = vietnamese ? "ThiTap: Tiếng Việt (" + method + ")" : "ThiTap: English";
 
-            Icon next = IconDesign.CreateIcon(16, vietnamese);
+            // Icon khay dùng đúng cỡ hệ thống yêu cầu để không bị nhoè khi màn hình phóng to.
+            Icon next = IconDesign.CreateIcon(SystemInformation.SmallIconSize.Width, vietnamese);
             _tray.Icon = next;
             if (_icon != null) _icon.Dispose();
             _icon = next;

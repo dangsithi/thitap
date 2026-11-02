@@ -245,11 +245,61 @@ namespace ThiTap.Test
             SentenceVni("Chu7o7ng trinh2 d9u7o7c5 lu7u o73 thu7 muc5 bin",
                 "Chương trình được lưu ở thư mục bin");
 
+            // Phím chuyển chế độ gõ (đọc/ghi settings.ini và nhận phím).
+            HotkeyChecks();
+
             Console.WriteLine();
             Console.WriteLine(_failed == 0
                 ? "TẤT CẢ ĐỀU ĐÚNG"
                 : _failed + " TRƯỜNG HỢP SAI");
             return _failed == 0 ? 0 : 1;
+        }
+
+        /// <summary>Kiểm phím chuyển chế độ: chuỗi lưu trong settings.ini và việc nhận phím.</summary>
+        private static void HotkeyChecks()
+        {
+            // Dạng cũ (dấu gạch dưới) vẫn phải đọc được để không mất cài đặt của bản trước.
+            ExpectHotkey("ctrl_shift", "ctrl+shift", "Ctrl + Shift");
+            ExpectHotkey("alt_z", "alt+z", "Alt + Z");
+            ExpectHotkey("Ctrl+Alt+F5", "ctrl+alt+f5", "Ctrl + Alt + F5");
+            ExpectHotkey("ctrl+oem3", "ctrl+oem3", "Ctrl + `");
+            ExpectHotkey("", "ctrl+shift", "Ctrl + Shift");
+
+            Hotkey ctrlShift = Hotkey.Parse("ctrl+shift");
+            MatchCheck(ctrlShift, true, false, true, false, Hotkey.VkLShift, true);
+            MatchCheck(ctrlShift, true, false, true, false, Hotkey.VkRShift, true);
+            MatchCheck(ctrlShift, true, false, true, false, 0x41, false);
+            MatchCheck(ctrlShift, true, false, false, false, Hotkey.VkLShift, false);
+            MatchCheck(ctrlShift, true, true, true, false, Hotkey.VkLShift, false);
+
+            // Ctrl không phải phím kích hoạt: giữ Shift rồi bấm Ctrl + mũi tên không đổi chế độ.
+            MatchCheck(ctrlShift, true, false, true, false, Hotkey.VkLControl, false);
+
+            Hotkey ctrlGrave = Hotkey.Parse("ctrl+oem3");
+            MatchCheck(ctrlGrave, true, false, false, false, 0xC0, true);
+            MatchCheck(ctrlGrave, true, false, true, false, 0xC0, false);
+            MatchCheck(ctrlGrave, false, false, false, false, 0xC0, false);
+        }
+
+        private static void ExpectHotkey(string stored, string serialized, string described)
+        {
+            Hotkey hotkey = Hotkey.Parse(stored);
+            if (string.Equals(hotkey.Serialize(), serialized, StringComparison.Ordinal)
+                && string.Equals(hotkey.Describe(), described, StringComparison.Ordinal)) return;
+
+            _failed++;
+            Console.WriteLine("SAI phím tắt: \"" + stored + "\" thành \"" + hotkey.Serialize()
+                + "\" / \"" + hotkey.Describe() + "\"");
+        }
+
+        private static void MatchCheck(Hotkey hotkey, bool ctrl, bool alt, bool shift, bool win,
+            int virtualKey, bool expected)
+        {
+            if (hotkey.Matched(ctrl, alt, shift, win, virtualKey) == expected) return;
+
+            _failed++;
+            Console.WriteLine("SAI nhận phím: " + hotkey.Serialize() + " với phím 0x"
+                + virtualKey.ToString("X2") + " khi ctrl=" + ctrl + " alt=" + alt + " shift=" + shift);
         }
 
         /// <summary>Kiểm một câu: chuỗi phím của từng từ cách nhau bằng dấu cách.</summary>

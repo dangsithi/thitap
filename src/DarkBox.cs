@@ -26,30 +26,34 @@ namespace ThiTap
 
             _warning = warning;
 
-            int bodyHeight = Ui.MeasureHeight(text, Theme.Body, BodyWidth);
-            int bodyTop = 72;
-            int buttonTop = bodyTop + bodyHeight + 20;
-            ClientSize = new Size(480, buttonTop + 32 + 24);
+            // Chữ dùng đơn vị point nên đo ra đã là điểm ảnh thật; các con số bố cục còn lại
+            // viết theo đơn vị 96 DPI nên phải nhân với tỉ lệ DPI của màn hình.
+            int bodyWidth = Theme.S(BodyWidth);
+            int bodyTop = Theme.S(72);
+            int bodyHeight = Ui.MeasureHeight(text, Theme.Body, bodyWidth);
+            int buttonTop = bodyTop + bodyHeight + Theme.S(20);
+            ClientSize = new Size(Theme.S(480), buttonTop + Theme.S(56));
 
             Label heading = Ui.Title(this, title, 66, 26, 390);
-            heading.Height = 26;
+            heading.Height = Theme.S(26);
 
-            Label body = Ui.Label(this, text, 24, bodyTop, BodyWidth);
+            Label body = Ui.Label(this, text, 24, 72, BodyWidth);
+            body.Location = new Point(Theme.S(24), bodyTop);
             body.Height = bodyHeight;
             body.ForeColor = Theme.SubText;
             body.TextAlign = ContentAlignment.TopLeft;
 
-            Ui.PrimaryButton(this, "Đóng", ClientSize.Width - 24 - 104, buttonTop, 104, 32,
-                delegate { Close(); });
+            FlatButton close = Ui.PrimaryButton(this, "Đóng", 0, 0, 104, 32, delegate { Close(); });
+            close.Location = new Point(ClientSize.Width - Theme.S(24 + 104), buttonTop);
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            Theme.DrawSurface(e.Graphics, new Rectangle(0, 0, Width, Height), Radius,
+            Theme.DrawSurface(e.Graphics, new Rectangle(0, 0, Width, Height), Theme.S(Radius),
                 Theme.Background, Theme.Border);
 
             // Biểu tượng tròn nhỏ: chữ "i" cho thông tin, dấu "!" cho cảnh báo.
-            Rectangle circle = new Rectangle(24, 26, 30, 30);
+            Rectangle circle = new Rectangle(Theme.S(24), Theme.S(26), Theme.S(30), Theme.S(30));
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             using (SolidBrush brush = new SolidBrush(Theme.Accent))
             {
@@ -61,7 +65,7 @@ namespace ThiTap
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            Theme.ClipRounded(this, Radius);
+            Theme.ClipRounded(this, Theme.S(Radius));
         }
 
         protected override void OnKeyDown(KeyEventArgs e)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using ThiTap.Engine;
 
 namespace ThiTap
 {
@@ -12,14 +13,16 @@ namespace ThiTap
     internal sealed class ConfigForm : Form
     {
         /// <summary>Phiên bản hiển thị ở thanh tiêu đề và hộp thoại Thông tin.</summary>
-        public const string Version = "1.3";
+        public const string Version = "1.4";
 
         private readonly Action _settingsChanged;
         private readonly Action _exitApp;
 
         private DarkComboBox _typingMethod;
-        private DarkRadio _hotkeyCtrlShift;
-        private DarkRadio _hotkeyAltZ;
+        private FlatButton _hotkeyButton;
+        private bool _capturingHotkey;
+        private Hotkey _capturedModifiers;
+        private readonly Timer _captureTimer = new Timer();
         private DarkCheckBox _oldStyleTone;
         private DarkCheckBox _spellCheck;
         private DarkCheckBox _beepOnSwitch;
@@ -39,17 +42,23 @@ namespace ThiTap
             _exitApp = exitApp;
 
             Text = "ThiTap " + Version;
-            ClientSize = new Size(560, 610);
+            ClientSize = new Size(Theme.S(560), Theme.S(610));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             ShowInTaskbar = true;
             StartPosition = FormStartPosition.CenterScreen;
             AutoScaleMode = AutoScaleMode.None;
+            KeyPreview = true;
 
             Icon icon = IconDesign.CreateIcon(32, true);
             Icon = icon;
 
             Theme.Apply(this);
+
+            // Đang bắt tổ hợp phím: bấm ra ngoài hoặc chuyển sang cửa sổ khác là huỷ.
+            MouseDown += delegate { if (_capturingHotkey) CancelHotkeyCapture(); };
+            _captureTimer.Interval = 50;
+            _captureTimer.Tick += delegate { CheckCapturedModifiers(); };
 
             BuildUi();
             LoadValues();
@@ -88,11 +97,9 @@ namespace ThiTap
             Ui.Button(controlCard, "...", 418, 44, 34, 24, null).Enabled = false;
 
             Ui.Label(controlCard, "Phím chuyển", 16, 86, 82);
-            bool altZ = string.Equals(Settings.Hotkey, Settings.HotkeyAltZ, StringComparison.Ordinal);
-            _hotkeyCtrlShift = Ui.Radio(controlCard, "CTRL + SHIFT", 102, 85, 108, !altZ,
-                delegate { SelectHotkey(Settings.HotkeyCtrlShift); });
-            _hotkeyAltZ = Ui.Radio(controlCard, "ALT + Z", 214, 85, 90, altZ,
-                delegate { SelectHotkey(Settings.HotkeyAltZ); });
+            _hotkeyButton = Ui.Button(controlCard, string.Empty, 102, 81, 168, 30,
+                delegate { BeginHotkeyCapture(); });
+            Ui.Note(controlCard, "bấm vào để đổi tổ hợp", 278, 87, 160);
 
             CardPanel optionCard = Ui.Card(this, "Tùy chọn", left, 224, width, 138);
 
@@ -132,17 +139,155 @@ namespace ThiTap
             Ui.PrimaryButton(this, "Đóng", right - 104, 562, 104, 32, delegate { Hide(); });
         }
 
-        private void SelectHotkey(string hotkey)
+        /// <summary>
+        /// Bắt tổ hợp phím mới cho lần chuyển chế độ: giữ các phím bổ trợ rồi bấm phím chính,
+        /// hoặc chỉ cần giữ hai phím bổ trợ (ví dụ Ctrl + Shift).
+        /// </summary>
+        private void BeginHotkeyCapture()
         {
-            Settings.Hotkey = hotkey;
+            if (_capturingHotkey)
+            {
+                CancelHotkeyCapture();
+                return;
+            }
 
-            // Nút chọn không còn tự loại trừ nhau như RadioButton, nên đồng bộ cả hai.
-            Ui.Loading = true;
-            _hotkeyCtrlShift.Checked = string.Equals(hotkey, Settings.HotkeyCtrlShift, StringComparison.Ordinal);
-            _hotkeyAltZ.Checked = string.Equals(hotkey, Settings.HotkeyAltZ, StringComparison.Ordinal);
-            Ui.Loading = false;
+            _capturingHotkey = true;
+            HotkeyCapture.Active = true;
+            _capturedModifiers = new Hotkey();
+            _hotkeyButton.Text = "Bấm tổ hợp phím...";
+            _captureTimer.Start();
+        }
 
+        private void CancelHotkeyCapture()
+        {
+            _capturingHotkey = false;
+            HotkeyCapture.Active = false;
+            _captureTimer.Stop();
+            ShowHotkey();
+        }
+
+        private void ShowHotkey()
+        {
+            _hotkeyButton.Text = Hotkey.Parse(Settings.Hotkey).Describe();
+        }
+
+        /// <summary>Phím bấm trong lúc bắt tổ hợp: không cho lọt xuống các control khác.</summary>
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (!_capturingHotkey) return base.ProcessCmdKey(ref msg, keyData);
+
+            if ((keyData & Keys.KeyCode) == Keys.Escape)
+            {
+                CancelHotkeyCapture();
+                return true;
+            }
+
+            Hotkey hotkey = Candidate(keyData);
+            if (hotkey.Key == 0)
+            {
+                // Mới có phím bổ trợ: ghi nhận rồi chờ phím chính, hoặc chờ nhả phím.
+                _capturedModifiers.Ctrl = _capturedModifiers.Ctrl || hotkey.Ctrl;
+                _capturedModifiers.Alt = _capturedModifiers.Alt || hotkey.Alt;
+                _capturedModifiers.Shift = _capturedModifiers.Shift || hotkey.Shift;
+                _hotkeyButton.Text = _capturedModifiers.Describe() + " ...";
+                return true;
+            }
+
+            ApplyHotkey(hotkey);
+            return true;
+        }
+
+        /// <summary>
+        /// Nhả hết phím mà không bấm phím chính: nhận tổ hợp chỉ gồm phím bổ trợ.
+        /// Một phím bổ trợ duy nhất thì không nhận, vì gõ chữ nào cũng sẽ đổi chế độ.
+        /// </summary>
+        private void CheckCapturedModifiers()
+        {
+            if (!_capturingHotkey) return;
+            if (Control.ModifierKeys != Keys.None) return;
+
+            if (_capturedModifiers.ModifierCount < 2)
+            {
+                if (_capturedModifiers.ModifierCount == 1)
+                {
+                    _hotkeyButton.Text = "Cần thêm một phím bổ trợ nữa";
+                    _capturedModifiers = new Hotkey();
+                }
+                return;
+            }
+
+            ApplyHotkey(_capturedModifiers);
+        }
+
+        private void ApplyHotkey(Hotkey hotkey)
+        {
+            if (hotkey.Key != 0 && hotkey.ModifierCount == 0)
+            {
+                _hotkeyButton.Text = "Cần thêm Ctrl / Alt / Shift";
+                return;
+            }
+
+            _capturingHotkey = false;
+            HotkeyCapture.Active = false;
+            _captureTimer.Stop();
+
+            Settings.Hotkey = hotkey.Serialize();
+            ShowHotkey();
             ApplyChanged();
+        }
+
+        /// <summary>Tổ hợp từ một lần bấm phím; keyData đã có sẵn trạng thái các phím bổ trợ.</summary>
+        private static Hotkey Candidate(Keys keyData)
+        {
+            Hotkey hotkey = new Hotkey();
+            hotkey.Ctrl = (keyData & Keys.Control) == Keys.Control;
+            hotkey.Alt = (keyData & Keys.Alt) == Keys.Alt;
+            hotkey.Shift = (keyData & Keys.Shift) == Keys.Shift;
+
+            Keys code = keyData & Keys.KeyCode;
+            if (Hotkey.IsModifier((int)code))
+            {
+                switch ((int)code)
+                {
+                    case 0x10:
+                    case 0xA0:
+                    case 0xA1:
+                        hotkey.Shift = true;
+                        break;
+                    case 0x11:
+                    case 0xA2:
+                    case 0xA3:
+                        hotkey.Ctrl = true;
+                        break;
+                    case 0x12:
+                    case 0xA4:
+                    case 0xA5:
+                        hotkey.Alt = true;
+                        break;
+                }
+            }
+            else
+            {
+                hotkey.Key = (int)code;
+            }
+            return hotkey;
+        }
+
+        protected override void OnDeactivate(EventArgs e)
+        {
+            if (_capturingHotkey) CancelHotkeyCapture();
+            base.OnDeactivate(e);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _captureTimer.Stop();
+                _captureTimer.Dispose();
+                HotkeyCapture.Active = false;
+            }
+            base.Dispose(disposing);
         }
 
         private void ApplyChanged()
@@ -174,9 +319,7 @@ namespace ThiTap
             Ui.Loading = true;
             try
             {
-                bool altZ = string.Equals(Settings.Hotkey, Settings.HotkeyAltZ, StringComparison.Ordinal);
-                _hotkeyAltZ.Checked = altZ;
-                _hotkeyCtrlShift.Checked = !altZ;
+                _hotkeyButton.Text = Hotkey.Parse(Settings.Hotkey).Describe();
                 _typingMethod.SelectedIndex = Settings.VniMode ? 1 : 0;
 
                 _oldStyleTone.Checked = Settings.OldStyleTone;

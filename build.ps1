@@ -56,6 +56,10 @@ if ($Test) {
 
 $exe = Join-Path $bin 'ThiTap.exe'
 
+# Khai báo hiểu DPI (màn hình 125% / 150% không bị phóng to làm nhoè chữ).
+$manifestPath = Join-Path $root 'app.manifest'
+if (-not (Test-Path $manifestPath)) { throw "Không tìm thấy $manifestPath." }
+
 # Icon nhúng trong file exe: sinh lại khi chưa có hoặc khi thiết kế icon đã thay đổi.
 $iconPath = Join-Path $root 'assets\ThiTap.ico'
 $iconSources = @((Join-Path $root 'src\IconDesign.cs'), (Join-Path $root 'tools\MakeIcon.cs'))
@@ -78,7 +82,7 @@ if ($needIcon) {
     if (-not (Test-Path $iconPath)) { throw "Không tạo được $iconPath." }
 }
 
-& $csc /nologo /target:winexe /optimize+ /win32icon:$iconPath /out:$exe $references $appSources $engineSources $inputSources
+& $csc /nologo /target:winexe /optimize+ /win32icon:$iconPath /win32manifest:$manifestPath /out:$exe $references $appSources $engineSources $inputSources
 if ($LASTEXITCODE -ne 0) { throw "Biên dịch thất bại (mã $LASTEXITCODE)." }
 
 Write-Host "Đã build: $exe"

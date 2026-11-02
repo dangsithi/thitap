@@ -8,7 +8,7 @@ Hỗ trợ **Telex** và **VNI**, xuất **Unicode dựng sẵn**, có gõ tắt
 
 ## Tải về
 
-Bản chạy sẵn (không cần cài đặt): [ThiTap 1.3 — ThiTap-1.3-win64.zip](https://github.com/dangsithi/thitap/releases/latest)
+Bản chạy sẵn (không cần cài đặt): [ThiTap 1.4 — ThiTap-1.4-win64.zip](https://github.com/dangsithi/thitap/releases/latest)
 
 ## Tính năng
 
@@ -20,7 +20,8 @@ Bản chạy sẵn (không cần cài đặt): [ThiTap 1.3 — ThiTap-1.3-win64.
 - **Đặt dấu muộn vẫn đúng**: `w` gõ sau phụ âm cuối vẫn đổi được nguyên âm của âm tiết (`ungws` → `ứng`, `thuongw` → `thương`).
 - **Luôn dùng clipboard cho Unicode** cho ứng dụng không nhận `SendInput` Unicode.
 - **Bật/tắt theo từng ứng dụng**: khai báo danh sách tiến trình không muốn gõ tiếng Việt.
-- **Chuyển tiếng Việt / English** bằng `Ctrl + Shift`, `Alt + Z` hoặc bấm chuột trái vào biểu tượng ở khay.
+- **Phím chuyển ngôn ngữ tuỳ biến**: mặc định `Ctrl + Shift`, đổi sang tổ hợp bất kỳ (vd. `` Ctrl + ` ``, `Alt + Z`) bằng nút **Phím chuyển** trong hộp thoại cấu hình.
+- **Hiểu DPI**: exe khai báo DPI awareness nên ở màn hình đặt 125% / 150% cửa sổ và chữ vẫn sắc nét, bố cục giãn theo tỉ lệ thay vì bị Windows phóng to làm nhoè.
 - **Biểu tượng khay đổi theo chế độ**: cờ Việt Nam (đỏ, sao vàng) khi gõ tiếng Việt, cờ Liên hiệp Anh (Union Jack) khi dùng tiếng Anh.
 - **Khởi động cùng Windows** bằng một mục trong menu khay.
 - **Cấu hình portable**: `settings.ini` nằm cạnh `ThiTap.exe` (nếu không ghi được thì dùng `%APPDATA%\ThiTap`).
@@ -42,6 +43,8 @@ Mọi cửa sổ (cấu hình, bảng gõ tắt, bật/tắt theo ứng dụng, 
 | Viền | `#3D3D3D` (rê chuột `#555555`) |
 
 Phân cấp thị giác dựa vào độ sáng của từng lớp nền (form → card → ô nhập) cộng viền 1px mảnh, không dùng đường kẻ đậm; các khối bo góc mềm (card 10px, nút và ô nhập 7px, ô đánh dấu 4px). Thanh tiêu đề, thanh cuộn và menu ngữ cảnh của Windows cũng được đưa sang tối.
+
+Bố cục được thiết kế theo đơn vị 96 DPI rồi nhân với tỉ lệ màn hình (`Theme.S`), nên ở 125% / 150% cửa sổ và chữ to lên đồng thời mà không bị nhoè: exe khai báo hiểu DPI trong `app.manifest`, Windows không phóng to ảnh chụp cửa sổ nữa.
 
 ## Bảng phím
 
@@ -84,7 +87,7 @@ Từ không phải âm tiết tiếng Việt thì **không bị bỏ dấu**, đ
 
 1. Tải `ThiTap.exe` (hoặc tự build, xem bên dưới) và đặt vào một thư mục bất kỳ.
 2. Chạy `ThiTap.exe` — biểu tượng ở khay hệ thống là cờ Việt Nam (đỏ, sao vàng); khi chuyển sang English, biểu tượng đổi thành cờ Liên hiệp Anh (Union Jack).
-3. Bấm chuột trái vào biểu tượng để chuyển nhanh giữa tiếng Việt và English.
+3. Bấm chuột trái vào biểu tượng, hoặc nhấn tổ hợp phím đã cài (mặc định `Ctrl + Shift`) để chuyển nhanh giữa tiếng Việt và English.
 4. Bấm chuột phải để mở **Cấu hình...**, bật **Khởi động cùng Windows** hoặc **Thoát**.
 
 ThiTap không cài đặt vào hệ thống: muốn dùng ở máy khác chỉ cần copy cả thư mục (file exe và `settings.ini`).
@@ -99,7 +102,7 @@ File được tạo tự động bên cạnh `ThiTap.exe` khi chạy lần đầ
 | --- | --- |
 | `enabled` | 1 = đang gõ tiếng Việt, 0 = English |
 | `inputMethod` | `telex` hoặc `vni` |
-| `hotkey` | `ctrl_shift` hoặc `alt_z` |
+| `hotkey` | tổ hợp chuyển ngôn ngữ, dạng chữ thường nối bằng dấu `+`: `ctrl+shift` (mặc định), `alt+z`, `ctrl+oem3` (dấu `` ` ``)… Hợp lệ: `CTRL`, `ALT`, `SHIFT`, `WIN`; chữ cái `A`–`Z`, `0`–`9`, `F1`–`F24` và tên phím như `oem1` `space` `left`. Giá trị cũ `ctrl_shift`, `alt_z` vẫn đọc được. |
 | `spellCheck` | 1 = kiểm tra chính tả (từ không phải âm tiết tiếng Việt thì không bỏ dấu) |
 | `oldStyleTone` | 1 = đặt dấu oà, uý thay vì oá, úy |
 | `macroEnabled` | 1 = bật gõ tắt |
@@ -156,6 +159,7 @@ Mục **Tải về** ở đầu README trỏ tới `/releases/latest` nên khôn
 
 ### Lịch sử phát hành
 
+- **v1.4** — `ThiTap-1.4-win64.zip`: phím chuyển ngôn ngữ tuỳ biến (bắt tổ hợp bất kỳ trong **Cấu hình → Phím chuyển**), sửa lỗi phím tắt không chuyển chế độ, giao diện giãn đúng theo DPI (manifest + toạ độ nhân tỉ lệ).
 - **v1.3** — `ThiTap-1.3-win64.zip`: giao diện tối toàn bộ (bảng màu `#202020` / `#2B2B2B` / `#4CC2FF`, card bo góc), thêm phím `[` `]`, luật UniKey cho từ không phải âm tiết tiếng Việt (`WWindowws` → `Windows`).
 - **v1.2** — `ThiTap-1.2-win64.zip`: `w` gõ sau phụ âm cuối vẫn đổi đúng nguyên âm (`ungws` → `ứng`, `thuongw` → `thương`); xoá lui bỏ đúng phím của chữ vừa mất nên gõ tiếp vẫn ra đúng từ.
 - **v1.1** — `ThiTap-1.1-win64.zip`: sửa lỗi đặt dấu sai sau khi bấm Backspace rồi gõ tiếp (`hội` → xoá → `ij` ra `hộị` như bản cũ, nay ra `hội`).
@@ -169,7 +173,8 @@ Mục **Tải về** ở đầu README trỏ tới `/releases/latest` nên khôn
 - 36 từ và 2 câu VNI;
 - 16 chuỗi Telex và 3 chuỗi VNI có bấm Backspace giữa chừng (mô phỏng cả màn hình lẫn lõi gõ);
 - gõ tắt (mở rộng đúng, không mở rộng khi tắt);
-- khôi phục phím tiếng Anh (có và không được khôi phục).
+- khôi phục phím tiếng Anh (có và không được khôi phục);
+- tổ hợp phím chuyển ngôn ngữ: đọc/ghi chuỗi, hiển thị tên phím, khớp đúng tổ hợp và không khớp khi thừa phím bổ trợ.
 
 Kết quả in `TẤT CẢ ĐỀU ĐÚNG` khi mọi ca đều qua.
 
@@ -177,8 +182,9 @@ Kết quả in `TẤT CẢ ĐỀU ĐÚNG` khi mọi ca đều qua.
 
 ```
 build.ps1            build bằng csc.exe, sinh icon và chạy kiểm thử
+app.manifest         khai báo hiểu DPI và quyền chạy (asInvoker), nhúng vào exe khi build
 assets\ThiTap.ico    icon nhúng trong file exe
-src\Engine\          lõi gõ: TelexEngine, bảng chữ Vietnamese, danh sách từ tiếng Anh
+src\Engine\          lõi gõ: TelexEngine, bảng chữ Vietnamese, danh sách từ tiếng Anh, tổ hợp phím (Hotkey)
 src\Input\           hook bàn phím (WH_KEYBOARD_LL) và bộ gửi phím
 src\                 host WinForms: khay hệ thống, hộp thoại cấu hình, cài đặt, tự khởi động
 src\Theme.cs, Ui.cs, DarkControls.cs, DarkBox.cs

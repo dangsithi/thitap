@@ -72,7 +72,7 @@ namespace ThiTap
         {
             if (_header.Length == 0) return;
             Theme.DrawText(e.Graphics, _header, Theme.CardHeader, Theme.SubText,
-                new Rectangle(16, 12, Width - 32, 18));
+                new Rectangle(Theme.S(16), Theme.S(12), Width - Theme.S(32), Theme.S(18)));
         }
     }
 
@@ -190,20 +190,22 @@ namespace ThiTap
             }
 
             Theme.FillBehind(g, this);
-            Theme.DrawSurface(g, new Rectangle(0, 0, Width, Height), Theme.ButtonRadius, fill, border);
+            Theme.DrawSurface(g, new Rectangle(0, 0, Width, Height), Theme.S(Theme.ButtonRadius), fill, border);
 
             if (Focused && Enabled && _kind != ButtonKind.Primary)
             {
                 using (Pen pen = new Pen(Theme.Accent))
-                using (GraphicsPath path = Theme.Rounded(new Rectangle(2, 2, Width - 5, Height - 5),
-                    Theme.ButtonRadius - 2))
+                using (GraphicsPath path = Theme.Rounded(
+                    new Rectangle(Theme.S(2), Theme.S(2), Width - Theme.S(5), Height - Theme.S(5)),
+                    Theme.S(Theme.ButtonRadius - 2)))
                 {
                     g.SmoothingMode = SmoothingMode.AntiAlias;
                     g.DrawPath(pen, path);
                 }
             }
 
-            Theme.DrawTextCentered(g, Text, Font, text, new Rectangle(6, 0, Width - 12, Height));
+            Theme.DrawTextCentered(g, Text, Font, text,
+                new Rectangle(Theme.S(6), 0, Width - Theme.S(12), Height));
         }
     }
 
@@ -299,34 +301,34 @@ namespace ThiTap
             Theme.FillBehind(g, this);
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            const int size = 16;
+            int size = Theme.S(16);
             int top = (Height - size) / 2;
-            Rectangle box = new Rectangle(1, top, size, size);
+            Rectangle box = new Rectangle(Theme.S(1), top, size, size);
 
             Color fill = Checked ? Theme.Accent : Theme.Field;
             Color border = !Enabled ? Theme.Border
                 : Checked ? Color.Empty
                 : (_hover || Focused ? Theme.BorderHover : Theme.Border);
-            Theme.DrawSurface(g, box, Theme.BoxRadius, fill, border);
+            Theme.DrawSurface(g, box, Theme.S(Theme.BoxRadius), fill, border);
 
             if (Checked)
             {
-                using (Pen pen = new Pen(Enabled ? Theme.OnAccent : Theme.SubText, 2f))
+                using (Pen pen = new Pen(Enabled ? Theme.OnAccent : Theme.SubText, 2f * Theme.Scale))
                 {
                     pen.StartCap = LineCap.Round;
                     pen.EndCap = LineCap.Round;
                     g.DrawLines(pen, new Point[]
                     {
-                        new Point(box.X + 4, box.Y + 8),
-                        new Point(box.X + 7, box.Y + 11),
-                        new Point(box.X + 12, box.Y + 5)
+                        new Point(box.X + Theme.S(4), box.Y + Theme.S(8)),
+                        new Point(box.X + Theme.S(7), box.Y + Theme.S(11)),
+                        new Point(box.X + Theme.S(12), box.Y + Theme.S(5))
                     });
                 }
             }
 
             Color text = Enabled ? Theme.Text : Theme.DisabledText;
             Theme.DrawText(g, Text, Font, text,
-                new Rectangle(box.Right + 9, 0, Width - box.Right - 9, Height));
+                new Rectangle(box.Right + Theme.S(9), 0, Width - box.Right - Theme.S(9), Height));
         }
     }
 
@@ -420,9 +422,9 @@ namespace ThiTap
             Theme.FillBehind(g, this);
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            const int size = 16;
+            int size = Theme.S(16);
             int top = (Height - size) / 2;
-            Rectangle circle = new Rectangle(1, top, size, size);
+            Rectangle circle = new Rectangle(Theme.S(1), top, size, size);
 
             Color border = !Enabled ? Theme.Border
                 : Checked ? Theme.Accent
@@ -431,22 +433,23 @@ namespace ThiTap
             {
                 g.FillEllipse(brush, circle);
             }
-            using (Pen pen = new Pen(border, Checked ? 2f : 1f))
+            using (Pen pen = new Pen(border, Checked ? 2f * Theme.Scale : Math.Max(1f, Theme.Scale)))
             {
                 g.DrawEllipse(pen, circle);
             }
             if (Checked)
             {
-                Rectangle dot = new Rectangle(circle.X + 5, circle.Y + 5, 6, 6);
+                int dot = Theme.S(6);
+                Rectangle inner = new Rectangle(circle.X + Theme.S(5), circle.Y + Theme.S(5), dot, dot);
                 using (SolidBrush brush = new SolidBrush(Enabled ? Theme.OnAccent : Theme.SubText))
                 {
-                    g.FillEllipse(brush, dot);
+                    g.FillEllipse(brush, inner);
                 }
             }
 
             Color text = Enabled ? Theme.Text : Theme.DisabledText;
             Theme.DrawText(g, Text, Font, text,
-                new Rectangle(circle.Right + 9, 0, Width - circle.Right - 9, Height));
+                new Rectangle(circle.Right + Theme.S(9), 0, Width - circle.Right - Theme.S(9), Height));
         }
     }
 
@@ -466,7 +469,7 @@ namespace ThiTap
             BackColor = Theme.Field;
             ForeColor = Theme.Text;
             Font = Theme.Body;
-            ItemHeight = 22;
+            ItemHeight = Theme.S(22);
             Cursor = Cursors.Hand;
             DrawItem += OnDrawItem;
         }
@@ -525,21 +528,21 @@ namespace ThiTap
             Color text = Enabled ? Theme.Text : Theme.DisabledText;
             string caption = SelectedIndex >= 0 ? GetItemText(Items[SelectedIndex]) : string.Empty;
             Theme.DrawText(g, caption, Font, text,
-                new Rectangle(10, 0, bounds.Width - 10 - arrow, bounds.Height));
+                new Rectangle(Theme.S(10), 0, bounds.Width - Theme.S(10) - arrow, bounds.Height));
 
             // Mũi tên xuống nhỏ, vẽ bằng hai nét để không cần ảnh.
-            int cx = bounds.Right - arrow / 2 - 5;
-            int cy = bounds.Height / 2 - 1;
-            using (Pen pen = new Pen(Enabled ? Theme.SubText : Theme.DisabledText, 1.6f))
+            int cx = bounds.Right - arrow / 2 - Theme.S(5);
+            int cy = bounds.Height / 2 - Theme.S(1);
+            using (Pen pen = new Pen(Enabled ? Theme.SubText : Theme.DisabledText, 1.6f * Theme.Scale))
             {
                 pen.StartCap = LineCap.Round;
                 pen.EndCap = LineCap.Round;
                 g.SmoothingMode = SmoothingMode.AntiAlias;
                 g.DrawLines(pen, new Point[]
                 {
-                    new Point(cx - 4, cy - 2),
-                    new Point(cx, cy + 2),
-                    new Point(cx + 4, cy - 2)
+                    new Point(cx - Theme.S(4), cy - Theme.S(2)),
+                    new Point(cx, cy + Theme.S(2)),
+                    new Point(cx + Theme.S(4), cy - Theme.S(2))
                 });
             }
         }
@@ -562,7 +565,7 @@ namespace ThiTap
             }
 
             Theme.DrawText(e.Graphics, GetItemText(Items[e.Index]), Font, Theme.Text,
-                new Rectangle(e.Bounds.X + 9, e.Bounds.Y, e.Bounds.Width - 12, e.Bounds.Height));
+                new Rectangle(e.Bounds.X + Theme.S(9), e.Bounds.Y, e.Bounds.Width - Theme.S(12), e.Bounds.Height));
         }
     }
 
@@ -571,7 +574,11 @@ namespace ThiTap
     /// </summary>
     internal static class DarkList
     {
-        public const int RowHeight = 24;
+        /// <summary>Chiều cao mỗi dòng, tính theo DPI hiện tại.</summary>
+        public static int RowHeight
+        {
+            get { return Theme.S(24); }
+        }
 
         /// <summary>Chỉ đặt thuộc tính tối cho danh sách, không gắn bộ vẽ dòng.</summary>
         public static void StyleBase(ListBox list)
@@ -595,7 +602,7 @@ namespace ThiTap
             {
                 if (e.Index < 0) return;
                 PaintRow(e.Graphics, e.Bounds, IsSelected(e), list.GetItemText(list.Items[e.Index]),
-                    list.Font, e.Bounds.X + 12);
+                    list.Font, e.Bounds.X + Theme.S(12));
             };
         }
 
@@ -619,7 +626,7 @@ namespace ThiTap
         public static void PaintText(Graphics g, Rectangle bounds, string text, Font font, int textLeft)
         {
             Theme.DrawText(g, text, font, Theme.Text,
-                new Rectangle(textLeft, bounds.Y, bounds.Right - textLeft - 4, bounds.Height));
+                new Rectangle(textLeft, bounds.Y, bounds.Right - textLeft - Theme.S(4), bounds.Height));
         }
 
         /// <summary>Tô nền rồi vẽ chữ của một dòng không có ô đánh dấu.</summary>
@@ -633,31 +640,31 @@ namespace ThiTap
         /// <summary>Vẽ ô đánh dấu đầu dòng, trả về vị trí bắt đầu của chữ.</summary>
         public static int PaintCheck(Graphics g, Rectangle bounds, bool isChecked)
         {
-            const int size = 15;
+            int size = Theme.S(15);
             int top = bounds.Y + (bounds.Height - size) / 2;
-            Rectangle box = new Rectangle(bounds.X + 8, top, size, size);
+            Rectangle box = new Rectangle(bounds.X + Theme.S(8), top, size, size);
 
             g.SmoothingMode = SmoothingMode.AntiAlias;
-            Theme.DrawSurface(g, box, Theme.BoxRadius,
+            Theme.DrawSurface(g, box, Theme.S(Theme.BoxRadius),
                 isChecked ? Theme.Accent : Theme.FieldHover,
                 isChecked ? Color.Empty : Theme.BorderHover);
 
             if (isChecked)
             {
-                using (Pen pen = new Pen(Theme.OnAccent, 2f))
+                using (Pen pen = new Pen(Theme.OnAccent, 2f * Theme.Scale))
                 {
                     pen.StartCap = LineCap.Round;
                     pen.EndCap = LineCap.Round;
                     g.DrawLines(pen, new Point[]
                     {
-                        new Point(box.X + 4, box.Y + 8),
-                        new Point(box.X + 6, box.Y + 10),
-                        new Point(box.X + 11, box.Y + 5)
+                        new Point(box.X + Theme.S(4), box.Y + Theme.S(8)),
+                        new Point(box.X + Theme.S(7), box.Y + Theme.S(10)),
+                        new Point(box.X + Theme.S(11), box.Y + Theme.S(5))
                     });
                 }
             }
 
-            return box.Right + 10;
+            return box.Right + Theme.S(10);
         }
 
         public static bool IsSelected(DrawItemEventArgs e)

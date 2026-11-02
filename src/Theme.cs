@@ -103,6 +103,44 @@ namespace ThiTap
             }
         }
 
+        private static float _scale = -1f;
+
+        /// <summary>
+        /// Tỉ lệ phóng to theo DPI của màn hình: 1.0 là 96 DPI (100%), 1.5 là 150%.
+        /// Bố cục vẫn viết theo đơn vị 96 DPI rồi nhân với tỉ lệ này, còn chữ dùng đơn vị
+        /// point nên Windows tự phóng to — nhờ vậy khung và chữ không bị lệch nhau.
+        /// </summary>
+        public static float Scale
+        {
+            get
+            {
+                if (_scale < 0f) _scale = ReadScale();
+                return _scale;
+            }
+        }
+
+        private static float ReadScale()
+        {
+            try
+            {
+                using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))
+                {
+                    float scale = g.DpiX / 96f;
+                    return scale > 0f ? scale : 1f;
+                }
+            }
+            catch (Exception)
+            {
+                return 1f;
+            }
+        }
+
+        /// <summary>Số đo thiết kế (96 DPI) sang điểm ảnh của màn hình hiện tại.</summary>
+        public static int S(int value)
+        {
+            return (int)Math.Round(value * Scale, MidpointRounding.AwayFromZero);
+        }
+
         /// <summary>Vẽ một khối bo góc có viền 1px; viền truyền Color.Empty nếu không cần.</summary>
         public static void DrawSurface(Graphics g, Rectangle bounds, int radius, Color fill, Color border)
         {
