@@ -16,7 +16,6 @@ namespace ThiTap
         public const string KeyFreeTyping = "freeTyping";
         public const string KeySpellCheck = "spellCheck";
         public const string KeyOldStyleTone = "oldStyleTone";
-        public const string KeyShowNotification = "showNotification";
         public const string KeyBeepOnSwitch = "beepOnSwitch";
         public const string KeyShowDialogOnStart = "showDialogOnStart";
         public const string KeyMacroEnabled = "macroEnabled";
@@ -76,6 +75,9 @@ namespace ThiTap
                     Parse(legacy);
                 }
             }
+
+            // Khoá của tính năng đã bỏ (bong bóng thông báo khi chuyển ngôn ngữ): dọn khỏi file cũ.
+            Values.Remove("showNotification");
 
             FillMissingDefaults();
             Save();
@@ -162,7 +164,6 @@ namespace ThiTap
             EnsureDefault(KeyFreeTyping, "0");
             EnsureDefault(KeySpellCheck, "1");
             EnsureDefault(KeyOldStyleTone, "0");
-            EnsureDefault(KeyShowNotification, "1");
             EnsureDefault(KeyBeepOnSwitch, "0");
             EnsureDefault(KeyShowDialogOnStart, "0");
             EnsureDefault(KeyMacroEnabled, "0");
@@ -269,12 +270,6 @@ namespace ThiTap
         {
             get { return GetBool(KeyOldStyleTone, false); }
             set { SetBool(KeyOldStyleTone, value); }
-        }
-
-        public static bool ShowNotification
-        {
-            get { return GetBool(KeyShowNotification, true); }
-            set { SetBool(KeyShowNotification, value); }
         }
 
         public static bool BeepOnSwitch

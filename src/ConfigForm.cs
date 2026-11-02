@@ -20,7 +20,6 @@ namespace ThiTap
         private CheckBox _freeTyping;
         private CheckBox _oldStyleTone;
         private CheckBox _spellCheck;
-        private CheckBox _showNotification;
         private CheckBox _beepOnSwitch;
         private CheckBox _showDialogOnStart;
         private CheckBox _autoStart;
@@ -91,9 +90,7 @@ namespace ThiTap
                 delegate(bool value) { Settings.SpellCheck = value; });
             _autoRestore = AddCheck(optionGroup, "Tự động khôi phục phím tiếng Anh", 252, 48, 232, true,
                 delegate(bool value) { Settings.AutoRestore = value; });
-            _showNotification = AddCheck(optionGroup, "Hiện thông báo phản hồi", 252, 72, 232, true,
-                delegate(bool value) { Settings.ShowNotification = value; });
-            _beepOnSwitch = AddCheck(optionGroup, "Bật chuông khi chuyển ngôn ngữ", 252, 96, 232, true,
+            _beepOnSwitch = AddCheck(optionGroup, "Bật chuông khi chuyển ngôn ngữ", 252, 72, 232, true,
                 delegate(bool value) { Settings.BeepOnSwitch = value; });
 
             GroupBox macroGroup = AddGroup("Tùy chọn gõ tắt", 8, 284, 244, 116);
@@ -261,7 +258,6 @@ namespace ThiTap
                 _spellCheck.Checked = Settings.SpellCheck;
                 _autoRestore.Checked = Settings.AutoRestore;
                 _clipboard.Checked = Settings.ClipboardMode;
-                _showNotification.Checked = Settings.ShowNotification;
                 _beepOnSwitch.Checked = Settings.BeepOnSwitch;
                 _showDialogOnStart.Checked = Settings.ShowDialogOnStart;
                 _autoStart.Checked = AutoStart.IsEnabled();
@@ -311,6 +307,7 @@ namespace ThiTap
                 "  s = sắc, f = huyền, r = hỏi, x = ngã, j = nặng\n" +
                 "  z = bỏ dấu vừa đặt\n" +
                 "  aa = â, ee = ê, oo = ô, w = ư / ơ / ă, dd = đ\n" +
+                "  ww = w (bấm w hai lần khi muốn giữ đúng chữ w)\n" +
                 "  uo + w = ươ (nguowif → người)\n\n" +
                 "Kiểu gõ VNI:\n" +
                 "  1 = sắc, 2 = huyền, 3 = hỏi, 4 = ngã, 5 = nặng\n" +

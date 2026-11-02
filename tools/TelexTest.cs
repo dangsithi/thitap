@@ -88,6 +88,12 @@ namespace ThiTap.Test
             Check("uw", "ư");
             Check("ow", "ơ");
             Check("aw", "ă");
+
+            // Gõ w hai lần liền nhau: phím thứ hai huỷ ư và hiện ra đúng chữ w.
+            Check("ww", "w");
+            Check("WW", "W");
+            Check("www", "ww");
+            Check("uww", "uw");
             Check("test", "tét");
             Check("hello", "hello");
             Check("asd", "asd");

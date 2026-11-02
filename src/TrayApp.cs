@@ -87,12 +87,6 @@ namespace ThiTap
             Settings.Enabled = enabled;
             RefreshTray();
 
-            if (Settings.ShowNotification)
-            {
-                string method = Settings.VniMode ? "VNI" : "Telex";
-                _tray.ShowBalloonTip(1200, "ThiTap",
-                    enabled ? "Tiếng Việt (" + method + ")" : "English", ToolTipIcon.None);
-            }
             if (Settings.BeepOnSwitch)
             {
                 SystemSounds.Asterisk.Play();

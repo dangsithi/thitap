@@ -32,7 +32,7 @@ Hỗ trợ **Telex** và **VNI**, xuất **Unicode dựng sẵn**, có gõ tắt
 | `j` | nặng |
 | `z` | bỏ dấu vừa đặt |
 | `aa` `ee` `oo` | â ê ô |
-| `w` | ư / ơ / ă |
+| `w` | ư / ơ / ă (bấm `ww` để ra chữ `w`) |
 | `dd` | đ |
 | `uo` + `w` | ươ (`nguowif` → người) |
 
@@ -79,7 +79,6 @@ File được tạo tự động bên cạnh `ThiTap.exe` khi chạy lần đầ
 | `autoRestore` | 1 = tự khôi phục phím tiếng Anh |
 | `clipboardMode` | 1 = luôn dán qua clipboard |
 | `appFilter` | 1 = bật/tắt theo danh sách ứng dụng |
-| `showNotification` | 1 = hiện bong bóng thông báo khi chuyển ngôn ngữ |
 | `beepOnSwitch` | 1 = bíp khi chuyển ngôn ngữ |
 | `showDialogOnStart` | 1 = mở hộp thoại cấu hình mỗi lần khởi động |
 

@@ -279,7 +279,21 @@ namespace ThiTap.Engine
                 }
                 else if (key == 'w')
                 {
-                    ApplyW(plain, upper);
+                    if (i > 0 && _raw[i - 1].Ch == 'w')
+                    {
+                        // Gõ "ww" liền nhau: phím thứ hai huỷ ư do phím đầu tạo ra và hiện đúng chữ w.
+                        plain.Add(new PlainChar('w', upper));
+                        consumedIndex = i;
+                    }
+                    else if (i + 1 < _raw.Count && _raw[i + 1].Ch == 'w')
+                    {
+                        // Phím w đầu của cặp "ww" không hiện ra, nhường chỗ cho w thứ hai.
+                        consumedIndex = i;
+                    }
+                    else
+                    {
+                        ApplyW(plain, upper);
+                    }
                 }
                 else
                 {
