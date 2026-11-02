@@ -40,6 +40,7 @@ namespace ThiTap
 
         protected override void OnPaint(PaintEventArgs e)
         {
+            Theme.FillBehind(e.Graphics, this);
             Theme.DrawSurface(e.Graphics, new Rectangle(0, 0, Width, Height), Radius, Fill, Outline);
             OnPaintContent(e);
         }
@@ -188,6 +189,7 @@ namespace ThiTap
                 text = Theme.Text;
             }
 
+            Theme.FillBehind(g, this);
             Theme.DrawSurface(g, new Rectangle(0, 0, Width, Height), Theme.ButtonRadius, fill, border);
 
             if (Focused && Enabled && _kind != ButtonKind.Primary)
@@ -294,6 +296,7 @@ namespace ThiTap
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
+            Theme.FillBehind(g, this);
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             const int size = 16;
@@ -414,6 +417,7 @@ namespace ThiTap
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
+            Theme.FillBehind(g, this);
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             const int size = 16;

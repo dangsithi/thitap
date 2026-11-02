@@ -90,6 +90,19 @@ namespace ThiTap
             }
         }
 
+        /// <summary>
+        /// Tô kín nền control bằng BackColor trước khi vẽ khối bo góc. Control tự vẽ chỉ tô
+        /// phần trong đường bo, nên nếu không tô trước thì bốn góc còn trơ lại đệm nền cũ
+        /// của Windows và hiện thành màu đen.
+        /// </summary>
+        public static void FillBehind(Graphics g, Control control)
+        {
+            using (SolidBrush brush = new SolidBrush(control.BackColor))
+            {
+                g.FillRectangle(brush, control.ClientRectangle);
+            }
+        }
+
         /// <summary>Vẽ một khối bo góc có viền 1px; viền truyền Color.Empty nếu không cần.</summary>
         public static void DrawSurface(Graphics g, Rectangle bounds, int radius, Color fill, Color border)
         {
