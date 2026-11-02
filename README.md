@@ -131,7 +131,10 @@ Script dùng `csc.exe` của .NET Framework và tự thêm BOM UTF-8 cho mọi f
 
 Mục **Tải về** ở đầu README trỏ tới `/releases/latest` nên không cần sửa lại mỗi lần phát hành.
 
-Bản hiện tại: [v1.0](https://github.com/dangsithi/thitap/releases/tag/v1.0) — `ThiTap.exe`, `README.md`, `LICENSE` (42.294 byte).
+### Lịch sử phát hành
+
+- **v1.1** — `ThiTap-1.1-win64.zip` (43.116 byte): sửa lỗi đặt dấu sai sau khi bấm Backspace rồi gõ tiếp (`hội` → xoá → `ij` ra `hộị` như bản cũ, nay ra `hội`).
+- **v1.0** — `ThiTap-1.0-win64.zip` (42.294 byte): bản đầu tiên, Telex + VNI, biểu tượng khay cờ Việt Nam / cờ Liên hiệp Anh, bỏ thông báo khi chuyển ngôn ngữ, luật gõ `ww` = `w`.
 
 ## Kiểm thử
 
