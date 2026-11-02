@@ -6,6 +6,10 @@ Hỗ trợ **Telex** và **VNI**, xuất **Unicode dựng sẵn**, có gõ tắt
 - **Tác giả:** Ông Thi
 - **Giấy phép:** MIT (xem [LICENSE](LICENSE))
 
+## Tải về
+
+Bản chạy sẵn (không cần cài đặt): [ThiTap 1.0 — ThiTap-1.0-win64.zip](https://github.com/dangsithi/thitap/releases/latest)
+
 ## Tính năng
 
 - **Kiểu gõ Telex và VNI**, chuyển qua lại trong hộp thoại cấu hình.
