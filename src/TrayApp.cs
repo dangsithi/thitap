@@ -69,7 +69,6 @@ namespace ThiTap
         private void ApplySettings()
         {
             _engine.Enabled = Settings.Enabled;
-            _engine.AllowFreeTyping = Settings.FreeTyping;
             _engine.SpellCheck = Settings.SpellCheck;
             _engine.Vni = Settings.VniMode;
             _engine.AutoRestoreEnglish = Settings.AutoRestore;

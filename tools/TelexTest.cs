@@ -88,6 +88,11 @@ namespace ThiTap.Test
             Check("toanfs", "toán");
             Check("toansz", "toan");
             Check("guitarr", "guitar");
+
+            // Ví dụ trong hướng dẫn UniKey: từ không phải âm tiết tiếng Việt thì không bỏ dấu,
+            // phím dấu bấm hai lần chỉ hiện một lần.
+            Check("WWindowws", "Windows");
+            Check("Windowws", "Windows");
             Check("aa", "â");
             Check("aaa", "aaa");
             Check("w", "ư");
@@ -213,6 +218,7 @@ namespace ThiTap.Test
             Vni("hoa3", "hỏa");
             Vni("a1", "á");
             Vni("tie6ng1z", "tie6ng1z");
+            Vni("e11", "e1");
             Vni("a66", "â");
             // Như ví dụ trong hướng dẫn UniKey: 9 lùi về đổi chữ d, 7 bấm lại không sinh thêm số.
             Vni("duong97", "đương");

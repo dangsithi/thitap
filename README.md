@@ -60,6 +60,8 @@ Ví dụ: `tieengs Vieetj` → tiếng Việt.
 
 Ví dụ: `tie6ng1 Vie6t5` → tiếng Việt, `d9u7o7ng2` → đường, `duong9772` → đường (dấu móc và chữ đ gõ ở cuối từ).
 
+Từ không phải âm tiết tiếng Việt thì **không bị bỏ dấu**, đúng như UniKey: gõ `WWindowws` ra `Windows` (không ra `Windów`), `hello` ra `hello`, `guitarr` ra `guitar`, `www` ra `ww`. Muốn dấu được đặt cả khi từ không hợp lệ thì tắt **Bật kiểm tra chính tả** trong hộp thoại cấu hình.
+
 ## Sử dụng
 
 1. Tải `ThiTap.exe` (hoặc tự build, xem bên dưới) và đặt vào một thư mục bất kỳ.
@@ -80,8 +82,7 @@ File được tạo tự động bên cạnh `ThiTap.exe` khi chạy lần đầ
 | `enabled` | 1 = đang gõ tiếng Việt, 0 = English |
 | `inputMethod` | `telex` hoặc `vni` |
 | `hotkey` | `ctrl_shift` hoặc `alt_z` |
-| `freeTyping` | 1 = bỏ dấu cả khi âm tiết không hợp lệ |
-| `spellCheck` | 1 = kiểm tra chính tả |
+| `spellCheck` | 1 = kiểm tra chính tả (từ không phải âm tiết tiếng Việt thì không bỏ dấu) |
 | `oldStyleTone` | 1 = đặt dấu oà, uý thay vì oá, úy |
 | `macroEnabled` | 1 = bật gõ tắt |
 | `macroWhenOff` | 1 = gõ tắt cả khi đang ở chế độ English |
@@ -145,8 +146,8 @@ Mục **Tải về** ở đầu README trỏ tới `/releases/latest` nên khôn
 
 `bin\TelexTest.exe` (do `build.ps1 -Test` sinh ra) chạy hoàn toàn ở mức lõi gõ, không cần bàn phím thật:
 
-- 112 từ và 5 câu Telex;
-- 35 từ và 2 câu VNI;
+- 114 từ và 5 câu Telex;
+- 36 từ và 2 câu VNI;
 - 16 chuỗi Telex và 3 chuỗi VNI có bấm Backspace giữa chừng (mô phỏng cả màn hình lẫn lõi gõ);
 - gõ tắt (mở rộng đúng, không mở rộng khi tắt);
 - khôi phục phím tiếng Anh (có và không được khôi phục).

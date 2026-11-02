@@ -68,10 +68,10 @@ namespace ThiTap.Engine
 
         public bool Enabled { get; set; }
 
-        /// <summary>Cho phép gõ tự do: vẫn đặt dấu dù âm tiết không hợp lệ.</summary>
-        public bool AllowFreeTyping { get; set; }
-
-        /// <summary>Bật kiểm tra chính tả: tắt đi thì từ không hợp lệ vẫn được bỏ dấu.</summary>
+        /// <summary>
+        /// Kiểm tra chính tả như UniKey: tắt đi thì từ không hợp lệ vẫn được bỏ dấu
+        /// (dấu đặt ở nguyên âm cuối), bật thì chỉ bỏ dấu khi từ là âm tiết tiếng Việt.
+        /// </summary>
         public bool SpellCheck { get; set; }
 
         /// <summary>Tra bảng gõ tắt theo chữ đang hiển thị; null là không dùng gõ tắt.</summary>
@@ -282,8 +282,9 @@ namespace ThiTap.Engine
             string lower = BuildLower(plain);
             bool valid = Vietnamese.IsValidSyllable(lower);
 
-            // Gõ tự do hoặc tắt kiểm tra chính tả: vẫn hiển thị dấu dù âm tiết không hợp lệ.
-            if (valid || AllowFreeTyping || !SpellCheck)
+            // Kiểm tra chính tả: từ không phải âm tiết tiếng Việt thì không bỏ dấu, hiện đúng
+            // phím đã gõ như UniKey (gõ "Windowws" ra "Windows", không ra "Windów").
+            if (valid || !SpellCheck)
             {
                 int toneIndex;
                 if (tone == Vietnamese.ToneNone) toneIndex = -1;
@@ -302,7 +303,7 @@ namespace ThiTap.Engine
 
             // Không phải âm tiết tiếng Việt: hiển thị đúng những gì đã gõ.
             // Nếu phím cuối vừa bị dùng để xoá dấu thì nó không còn trên màn hình nữa.
-            return endsWithConsumedKey ? RenderPlain(plain) : RenderRaw();
+            return endsWithConsumedKey ? RenderPlain(plain) : RenderLiteral();
         }
 
         /// <summary>
@@ -713,15 +714,46 @@ namespace ThiTap.Engine
             return buffer.ToString();
         }
 
-        private string RenderRaw()
+        /// <summary>
+        /// Hiện lại phím đã gõ khi từ không phải âm tiết tiếng Việt, theo cách của UniKey:
+        /// phím dấu bấm hai lần chỉ hiện một lần ("WWindowws" ra "Windows", "ass" ra "as",
+        /// còn "www" ra "ww" vì phím thứ nhất bị phím thứ hai huỷ).
+        /// </summary>
+        private string RenderLiteral()
         {
             StringBuilder buffer = new StringBuilder(_raw.Count);
-            for (int i = 0; i < _raw.Count; i++)
+            int i = 0;
+            while (i < _raw.Count)
             {
                 char ch = _raw[i].Ch;
-                buffer.Append(_raw[i].Upper ? char.ToUpperInvariant(ch) : ch);
+                int run = 1;
+                while (i + run < _raw.Count && _raw[i + run].Ch == ch) run++;
+
+                int emit = run;
+                if (run > 1 && IsMarkKey(ch)) emit = run - 1;
+
+                for (int k = 0; k < emit; k++)
+                {
+                    buffer.Append(_raw[i].Upper ? char.ToUpperInvariant(ch) : ch);
+                }
+                i += run;
             }
             return buffer.ToString();
+        }
+
+        /// <summary>Phím dấu của kiểu gõ đang dùng: s f r x j z w [ ] (Telex) và 0-9 (VNI).</summary>
+        private bool IsMarkKey(char ch)
+        {
+            if (Vni) return ch >= '0' && ch <= '9';
+
+            switch (ch)
+            {
+                case 's': case 'f': case 'r': case 'x': case 'j': case 'z':
+                case 'w': case '[': case ']':
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

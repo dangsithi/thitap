@@ -17,7 +17,6 @@ namespace ThiTap
         private ComboBox _typingMethod;
         private RadioButton _hotkeyCtrlShift;
         private RadioButton _hotkeyAltZ;
-        private CheckBox _freeTyping;
         private CheckBox _oldStyleTone;
         private CheckBox _spellCheck;
         private CheckBox _beepOnSwitch;
@@ -79,11 +78,9 @@ namespace ThiTap
 
             GroupBox optionGroup = AddGroup("Tùy chọn khác", 8, 146, 484, 130);
 
-            _freeTyping = AddCheck(optionGroup, "Cho phép gõ tự do", 12, 24, 232, true,
-                delegate(bool value) { Settings.FreeTyping = value; });
-            _oldStyleTone = AddCheck(optionGroup, "Đặt dấu oà, uý (thay vì oá, úy)", 12, 48, 232, true,
+            _oldStyleTone = AddCheck(optionGroup, "Đặt dấu oà, uý (thay vì oá, úy)", 12, 24, 232, true,
                 delegate(bool value) { Settings.OldStyleTone = value; });
-            _clipboard = AddCheck(optionGroup, "Luôn sử dụng clipboard cho Unicode", 12, 72, 232, true,
+            _clipboard = AddCheck(optionGroup, "Luôn sử dụng clipboard cho Unicode", 12, 48, 232, true,
                 delegate(bool value) { Settings.ClipboardMode = value; });
 
             _spellCheck = AddCheck(optionGroup, "Bật kiểm tra chính tả", 252, 24, 232, true,
@@ -253,7 +250,6 @@ namespace ThiTap
                 _hotkeyCtrlShift.Checked = !altZ;
                 _typingMethod.SelectedIndex = Settings.VniMode ? 1 : 0;
 
-                _freeTyping.Checked = Settings.FreeTyping;
                 _oldStyleTone.Checked = Settings.OldStyleTone;
                 _spellCheck.Checked = Settings.SpellCheck;
                 _autoRestore.Checked = Settings.AutoRestore;

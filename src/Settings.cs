@@ -13,7 +13,6 @@ namespace ThiTap
     {
         public const string KeyEnabled = "enabled";
         public const string KeyHotkey = "hotkey";
-        public const string KeyFreeTyping = "freeTyping";
         public const string KeySpellCheck = "spellCheck";
         public const string KeyOldStyleTone = "oldStyleTone";
         public const string KeyBeepOnSwitch = "beepOnSwitch";
@@ -161,7 +160,6 @@ namespace ThiTap
         {
             EnsureDefault(KeyEnabled, "1");
             EnsureDefault(KeyHotkey, HotkeyCtrlShift);
-            EnsureDefault(KeyFreeTyping, "0");
             EnsureDefault(KeySpellCheck, "1");
             EnsureDefault(KeyOldStyleTone, "0");
             EnsureDefault(KeyBeepOnSwitch, "0");
@@ -252,12 +250,6 @@ namespace ThiTap
         {
             get { return GetString(KeyHotkey, HotkeyCtrlShift); }
             set { SetString(KeyHotkey, value); }
-        }
-
-        public static bool FreeTyping
-        {
-            get { return GetBool(KeyFreeTyping, false); }
-            set { SetBool(KeyFreeTyping, value); }
         }
 
         public static bool SpellCheck
